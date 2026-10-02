@@ -1,0 +1,212 @@
+{
+  "main": {
+    "id": "a1b29a2e4fdb8b74",
+    "type": "split",
+    "children": [
+      {
+        "id": "48b9347bb2bd1c60",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "dd939024555ed6ee",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "COMP3000/Tutorials/COMP3000-Tutorial-3.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "COMP3000-Tutorial-3"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "116c2c5601946eff",
+    "type": "split",
+    "children": [
+      {
+        "id": "89571c1399f811f0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "82ae67ae23c252a4",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "a6bca206bf892d2c",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "909bbed6e0698d23",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "79112a9fb3aed3c3",
+    "type": "split",
+    "children": [
+      {
+        "id": "94dd43c34a0bf8ff",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "497d3ee99c40a1d1",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "COMP3000/Tutorials/COMP3000-Tutorial-1.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "1f9ddd225de5b134",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "COMP3000/Tutorials/COMP3000-Tutorial-1.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "710975299ac84445",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "752668053b0fd5f7",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "d3fad8d189cf438f",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "COMP3000/Tutorials/COMP3000-Tutorial-1.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "dd939024555ed6ee",
+  "lastOpenFiles": [
+    "COMP3000/Tutorials/COMP3000-Tutorial-2.md",
+    "COMP3000/Tutorials/COMP3000-Tutorial-3.md",
+    "COMP3000/Tutorials/COMP3000-Tutorial-1.md",
+    "Chat.md",
+    "COMP2406/Assignments/AS1/images/pawsibility_atWork.jpeg",
+    "COMP2406/Assignments/AS1/images/Banner.jpeg",
+    "COMP2406/Assignments/AS1/styles/styles.css",
+    "COMP2406/Assignments/AS1/styles/pet.css",
+    "COMP2406/Assignments/AS1/styles/index.css",
+    "COMP2406/Assignments/AS1/styles/browse.css",
+    "COMP2406/Assignments/AS1/styles/apply.css",
+    "COMP2406/Assignments/AS1/styles/about.css",
+    "COMP2406/Assignments/AS1/styles",
+    "COMP2406/Assignments/AS1/apply.js",
+    "COMP2406/Assignments/AS1/browse.js",
+    "COMP2406/Assignments/AS1/apply.css",
+    "COMP2406/Assignments/AS1/pawsibility_atWork.jpeg",
+    "COMP2406/Assignments/AS1/Banner.jpeg"
+  ]
+}

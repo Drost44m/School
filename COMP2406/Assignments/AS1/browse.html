@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pawsibility - Browse</title>
+<link rel="stylesheet" href="styles/styles.css">
+<link rel="stylesheet" href="styles/browse.css">
+<script src="shelterData.js" defer></script>
+<script src="browse.js" defer></script>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="browse.html" class="selected" aria-current="page">Browse Pets</a>
+    <a href="about.html">About Us</a>
+  </nav>
+
+  <div class="banner">
+    <h1>Pawsibility</h1>
+    <p>Every Paw Deserves a Loving Home</p>
+    <img src="images/Banner.jpeg" alt="A newly adopted dog">
+  </div>
+
+  <div class="section">
+    <h1>Select a Shelter</h1>
+    <select id="shelterSelect" aria-label="Select a shelter">
+      <option value="s1" selected>Happy Tails Rescue</option>
+      <option value="s2">Paws &amp; Whiskers Haven</option>
+      <option value="s3">Second Chance Animals</option>
+      <option value="s4">Forever Friends Shelter</option>
+      <option value="s5">Safe Haven Pets</option>
+    </select>
+
+    <div class="type-buttons" id="typeButtons">
+      <button data-type="all">All</button>
+      <button data-type="cat">Cats</button>
+      <button data-type="dog">Dogs</button>
+      <button data-type="bird">Birds</button>
+      <button data-type="reptile">Reptiles</button>
+      <button data-type="other">Other</button>
+    </div>
+  </div>
+
+  <section class="pet-grid">
+    <div>
+      <img src="images/dog1.jpg" alt="Milo">
+      <h2>Milo</h2>
+      <button onclick="location.href='pet.html'">View Details</button>
+    </div>
+    <div>
+      <img src="images/cat1.jpg" alt="Luna">
+      <h2>Luna</h2>
+      <button onclick="location.href='pet.html'">View Details</button>
+    </div>
+    <div>
+      <img src="images/dog2.jpg" alt="Rocky">
+      <h2>Rocky</h2>
+      <button onclick="location.href='pet.html'">View Details</button>
+    </div>
+    <div>
+      <img src="images/parrot1.jpg" alt="Coco">
+      <h2>Coco</h2>
+      <button onclick="location.href='pet.html'">View Details</button>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2026 Pawsibility | Every Paw Deserves a Loving Home
+  </footer>
+
+</body>
+</html>

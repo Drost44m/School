@@ -1,0 +1,65 @@
+/* index.html - landing page */
+
+.section {
+  text-align: center;
+}
+
+.section ul {
+  display: inline-block;
+  margin: 0;
+  padding-left: 20px;
+  text-align: left;
+}
+
+.section li {
+  margin-bottom: 8px;
+}
+
+/* "How Adoption Works": the three steps become three cards in a row
+   that wrap onto separate lines on narrow screens */
+.steps table,
+.steps tbody,
+.steps tr {
+  display: block;
+}
+
+.steps tr {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  counter-reset: step;
+}
+
+.steps td {
+  flex: 1 1 200px;
+  padding: 20px 16px;
+  background: var(--green-light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  counter-increment: step;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.steps td:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* numbered badge above each step */
+.steps td::before {
+  content: counter(step);
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 40px;
+}
+
+.steps h2 {
+  margin: 0;
+}

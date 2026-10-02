@@ -1,0 +1,86 @@
+/* browse.html */
+
+/* ---------- Pet-type filter buttons (behave like radio buttons) ---------- */
+
+.type-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* enabled, not selected */
+.type-buttons button {
+  background: #fff;
+  color: var(--green);
+  border: 2px solid var(--green);
+}
+
+/* hover: only on enabled buttons that are not the current selection */
+.type-buttons button:not(.selected):not(:disabled):hover {
+  background: var(--green-light);
+  color: var(--green-dark);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* selected (different colour from the other buttons, no hover effect) */
+.type-buttons button.selected {
+  background: var(--green);
+  color: #fff;
+  cursor: default;
+  box-shadow: none;
+}
+
+/* disabled: greyed out, dashed border, no hover */
+.type-buttons button:disabled {
+  background: var(--disabled-bg);
+  color: var(--disabled-text);
+  border: 2px dashed var(--disabled-text);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ---------- Pet grid ---------- */
+
+.pet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+  width: calc(100% - 32px);
+  max-width: var(--content-width);
+  margin: 24px auto 0;
+}
+
+.pet-grid > div {
+  padding: 16px;
+  text-align: center;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+/* hover cue for the pet the cursor is on */
+.pet-grid > div:hover {
+  transform: translateY(-6px);
+  border-color: var(--orange);
+  box-shadow: var(--shadow-hover);
+}
+
+/* images are never larger than 120 x 120 */
+.pet-grid img {
+  display: block;
+  width: 120px;
+  height: 120px;
+  max-width: 120px;
+  max-height: 120px;
+  margin: 0 auto;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.pet-grid h2 {
+  margin: 12px 0;
+  font-size: 1.2rem;
+}

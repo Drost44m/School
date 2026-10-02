@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(open \"/Users/michaeldrost/School/COMP2406/Assignments/AS1/index.html\")",
+      "Bash(open -a \"Google Chrome\" \"/Users/michaeldrost/School/COMP2406/Assignments/AS1/browse.html\")"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+body{ 
+    background-color: beige;
+    color: #604020;
+    font-family: 'Arial', serif;
+    text-align: center;
+}
+
+header{
+    background-color: #48220F;
+}
+
+img {
+    height: 300px;
+}
+
+header img {
+    width: 100%;
+    height :auto;
+}
+
+header a {
+    color: #3E1D0A;          /* default text color */
+    font-weight: bold;       /* make the text bold */
+    font-style: italic;      /* make the text italic */
+    font-size: 16pt;         /* set the text to 16pt size */
+    text-decoration: none;   /* remove default underlining applied to links */
+    margin: 15px 5px; /* spacing for top, right, bottom and left */
+    display: inline-block;       /* allows vertical margins to work */
+
+    border: 1px solid #805231;  /* border color */
+    border-radius: 10px;        /* makes corners rounded */
+    background-color: #A46B3E;  /* background color */
+    padding: 8px 15px;          /* vertical and horizontal spacing from border */
+    margin: 0;
+}
+
+header a:hover {
+    color: #FFFFFF;          /* text color on hover */
+    background-color: #905C2D;  /* background color on hover */
+}
+
+ footer {
+    background-color: #48220F;   /* background color */
+    color: white;                /* white text */
+}
+footer a {
+    color: #A46B3E;              /* lighter link text */
+    text-decoration: none;       /* remove default underlining applied to links */
+    margin: 0px 15px 15px 15px;  /* top, right, bottom, left margins */
+    display: inline-block;       /* allows vertical margins to work */
+}
+
+ul { 
+    list-style-type: disc;
+    padding: 0;
+}
+
+#contact-info {
+    text-align: left;
+    width: 320px;
+    margin: 20px auto;
+}

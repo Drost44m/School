@@ -1,0 +1,139 @@
+/* apply.html - the whole page body is one paper-style form */
+
+.application-form {
+  width: calc(100% - 32px);
+  max-width: 760px;
+  margin: 24px auto 0;
+  padding: 32px 40px;
+  background: #fffef9;
+  border: 1px solid var(--border);
+  border-top: 6px solid var(--green);
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.application-form h1 {
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 3px double var(--green);
+  text-align: center;
+}
+
+/* sections lose their card look and become ruled parts of the one form */
+.application-form .section {
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 20px 0;
+  background: none;
+  border: none;
+  border-bottom: 1px dashed var(--border);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.application-form h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--green);
+}
+
+.application-form .pet-info {
+  background: var(--green-light);
+  padding: 16px 20px;
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.application-form .pet-info h2 {
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--green-dark);
+  font-size: 1.4rem;
+}
+
+.application-form .pet-info p {
+  margin: 4px 0;
+}
+
+/* ---------- Fields ---------- */
+
+.application-form label {
+  display: block;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+
+.application-form input[type="text"],
+.application-form input[type="email"],
+.application-form input[type="tel"],
+.application-form input[type="number"],
+.application-form textarea,
+.application-form select {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-bottom: 2px solid var(--green);
+  border-radius: 4px;
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.application-form textarea {
+  resize: vertical;
+}
+
+.application-form input:focus,
+.application-form textarea:focus,
+.application-form select:focus {
+  background: var(--green-light);
+  outline: none;
+  border-bottom-color: var(--orange);
+}
+
+/* checkbox agreements */
+.application-form input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  vertical-align: middle;
+  accent-color: var(--green);
+}
+
+.application-form label:has(input[type="checkbox"]) {
+  font-weight: 400;
+}
+
+/* ---------- Submit button ---------- */
+
+.application-form button[type="submit"] {
+  display: block;
+  margin: 24px auto 0;
+  padding: 14px 40px;
+  font-size: 1.1rem;
+  background: var(--green);
+}
+
+/* enabled hover effect (disabled state comes from styles.css) */
+.application-form button[type="submit"]:not(:disabled):hover {
+  background: var(--orange);
+  transform: translateY(-2px);
+}
+
+.application-form button[type="submit"]:not(:disabled):active {
+  background: var(--orange-dark);
+  transform: translateY(1px);
+}
+
+@media (max-width: 520px) {
+  .application-form {
+    padding: 20px 16px;
+  }
+}

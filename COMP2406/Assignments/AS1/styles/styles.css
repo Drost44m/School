@@ -1,0 +1,205 @@
+/* ==========================================================
+   Pawsibility - general styles shared by ALL pages
+   Theme: grass green + warm orange on a soft cream background
+   ========================================================== */
+
+:root {
+  --green-dark: #1f4d3a;
+  --green: #2f6b4f;
+  --green-light: #e3f0e8;
+  --orange: #e8833a;
+  --orange-dark: #c96a24;
+  --cream: #fbf6ee;
+  --card: #ffffff;
+  --text: #33302c;
+  --muted: #6b645c;
+  --border: #e4dccf;
+  --disabled-bg: #ecebe8;
+  --disabled-text: #a09a92;
+  --radius: 12px;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15);
+  --content-width: 960px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--cream);
+  color: var(--text);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+}
+
+h1,
+h2 {
+  color: var(--green-dark);
+  line-height: 1.25;
+}
+
+a {
+  color: var(--green);
+}
+
+a:hover {
+  color: var(--orange-dark);
+}
+
+/* ---------- Navigation ---------- */
+
+nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--green-dark);
+}
+
+nav a {
+  padding: 8px 20px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* hover effect - only for links that are NOT the selected one */
+nav a:not(.selected):hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* selected page */
+nav a.selected {
+  background: var(--orange);
+  color: #fff;
+  cursor: default;
+}
+
+/* ---------- Banner (identical on every page) ---------- */
+
+.banner {
+  text-align: center;
+  background: var(--green);
+  color: #fff;
+}
+
+.banner h1 {
+  margin: 0;
+  padding: 20px 16px 0;
+  color: #fff;
+  font-size: 2.6rem;
+  letter-spacing: 1px;
+}
+
+.banner p {
+  margin: 0;
+  padding: 4px 16px 16px;
+  font-size: 1.1rem;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+.banner img {
+  display: block;
+  width: 100%;
+  max-height: 300px;
+  aspect-ratio: 4 / 1;
+  object-fit: cover;
+  object-position: center 35%;
+}
+
+/* ---------- Card-like content sections ---------- */
+
+.section {
+  width: calc(100% - 32px);
+  max-width: var(--content-width);
+  margin: 24px auto 0;
+  padding: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.section h1 {
+  margin-top: 0;
+  font-size: 1.7rem;
+}
+
+.section h2 {
+  margin-top: 0;
+  font-size: 1.35rem;
+}
+
+/* ---------- Buttons ---------- */
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: var(--orange);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+button:hover {
+  background: var(--orange-dark);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+button:disabled {
+  background: var(--disabled-bg);
+  color: var(--disabled-text);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- Form controls ---------- */
+
+select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 2px;
+}
+
+/* ---------- Footer (identical on every page) ---------- */
+
+footer {
+  margin-top: auto;
+  padding: 20px 16px;
+  background: var(--green-dark);
+  color: #fff;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+/* breathing room between whatever comes last and the footer */
+body > :nth-last-child(2) {
+  margin-bottom: 32px;
+}

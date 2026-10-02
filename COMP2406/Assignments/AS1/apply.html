@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pawsibility - Application</title>
+<link rel="stylesheet" href="styles/styles.css">
+<link rel="stylesheet" href="styles/apply.css">
+<script src="apply.js" defer></script>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="browse.html" class="selected" aria-current="page">Browse Pets</a>
+    <a href="about.html">About Us</a>
+  </nav>
+
+  <div class="banner">
+    <h1>Pawsibility</h1>
+    <p>Every Paw Deserves a Loving Home</p>
+    <img src="images/Banner.jpeg" alt="A newly adopted dog">
+  </div>
+
+  <form id="applicationForm" class="application-form">
+
+    <h1>Adoption Application</h1>
+
+    <div class="pet-info section">
+      <h2>Milo</h2>
+      <p>Type: Dog</p>
+      <p>Breed: Beagle Mix</p>
+      <p>
+        Adoption Fee: $180<br>
+        Processing Fee: $40<br>
+        Total: $220
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Your Information</h2>
+      <label>Full Name:
+        <input type="text" name="fullName" placeholder="e.g., Jane Smith" required>
+      </label>
+      <label>Email Address:
+        <input type="email" name="email" placeholder="e.g., jane.smith@email.com" required>
+      </label>
+      <label>Phone Number:
+        <input type="tel" name="phone" placeholder="e.g., 613-555-0123" required>
+      </label>
+      <label>Home Address:
+        <input type="text" name="address" placeholder="e.g., 123 Main St, Ottawa, ON" required>
+      </label>
+      <label>Number of Residents in Home:
+        <input type="number" name="residents" min="1" placeholder="e.g., 3" required>
+      </label>
+    </div>
+
+    <div class="section">
+      <h2>Current Pets in Your Home</h2>
+      <textarea name="currentPets" rows="4" cols="50" placeholder="List other pets that you have (species, age, health)"></textarea>
+    </div>
+
+    <div class="section">
+      <h2>Pet Experience</h2>
+      <label>Experience with this kind of pet:
+        <select name="experience">
+          <option>None</option>
+          <option>Some</option>
+          <option>Extensive</option>
+        </select>
+      </label>
+      <label>Where will this pet primarily live?
+        <select name="petLocation">
+          <option>Indoor</option>
+          <option>Outdoor</option>
+          <option>Both</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="section">
+      <h2>Support Us</h2>
+      <label>Optional Donation:
+        <select name="donation">
+          <option>$0</option>
+          <option>$10</option>
+          <option>$25</option>
+          <option>$50</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="section">
+      <label>
+        <input type="checkbox" name="careAgreement" required>
+        I agree to provide proper care, food, shelter and medical attention for this pet.
+      </label>
+      <label>
+        <input type="checkbox" name="noGuarantee" required>
+        I understand that this application does not guarantee adoption.
+      </label>
+    </div>
+
+    <button type="submit" disabled>Submit Application</button>
+
+  </form>
+
+  <footer>
+    &copy; 2026 Pawsibility | Every Paw Deserves a Loving Home
+  </footer>
+
+</body>
+</html>

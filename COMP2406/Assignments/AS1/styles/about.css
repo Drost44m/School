@@ -1,0 +1,72 @@
+/* about.html */
+
+.mission {
+  text-align: center;
+}
+
+.mission p {
+  max-width: 720px;
+  margin: 0 auto 20px;
+  text-align: left;
+}
+
+.mission img {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* Team table: fills the card, wraps text, and copes with any number of rows */
+.team p {
+  margin-top: 0;
+  color: var(--muted);
+}
+
+.team table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+}
+
+.team th,
+.team td {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.team th {
+  background: var(--green);
+  color: #fff;
+  font-weight: 600;
+}
+
+.team tbody tr:nth-child(even) {
+  background: var(--cream);
+}
+
+.team tbody tr:hover {
+  background: var(--green-light);
+}
+
+.team td:first-child {
+  font-weight: 600;
+  color: var(--green-dark);
+}
+
+/* very narrow screens: let the table scroll sideways inside its card
+   instead of squashing the columns */
+@media (max-width: 640px) {
+  .team {
+    overflow-x: auto;
+  }
+
+  .team table {
+    min-width: 560px;
+  }
+}

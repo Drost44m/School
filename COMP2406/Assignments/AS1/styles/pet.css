@@ -1,0 +1,59 @@
+/* pet.html */
+
+.back-link {
+  padding: 12px 24px;
+}
+
+.back-link a {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back-link a:hover {
+  text-decoration: underline;
+}
+
+.pet-detail {
+  text-align: center;
+}
+
+/* browse.html shows pets at 120px; here the image is 400px (3.3x larger) */
+.pet-detail img {
+  display: block;
+  width: 400px;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto 16px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.pet-detail p {
+  margin: 6px 0;
+}
+
+.pet-detail .fees {
+  display: block;
+  width: fit-content;
+  margin: 16px auto 20px;
+  padding: 12px 28px;
+  background: var(--green-light);
+  border-radius: var(--radius);
+  text-align: left;
+}
+
+/* the primary call-to-action */
+.pet-detail button {
+  padding: 14px 32px;
+  font-size: 1.1rem;
+}
+
+.pet-detail button:hover {
+  transform: translateY(-2px);
+}
+
+/* pressed state */
+.pet-detail button:active {
+  background: var(--green-dark);
+  transform: translateY(1px);
+}
