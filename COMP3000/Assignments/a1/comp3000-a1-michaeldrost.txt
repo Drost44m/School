@@ -1,0 +1,149 @@
+COMP 3000 2026F Assignment 1
+Name: Michael Drost
+Student ID: 101317132
+
+Collaborators/AI: Friend in Class, majority at home , some chatgpt asked for direction or to simplify man output or explain system variables
+
+1. 
+A custom command can be defined without changing 3000menu.c by setting the MENUCMD environment variable before running 3000menu. For example:
+
+MENUCMD="/usr/bin/pwd" ./3000menu
+
+The code in main() uses getenv("MENUCMD") to get the value of the environment variable. If it exists, the value is stored in menu[CUSTOM]. The CUSTOM entry is initially the string "CUSTOM". The run_program() function then passes the selected menu entry to system(), which executes the command.
+
+The parts that implement custom command support are the CUSTOM entry in the menu array, the getenv("MENUCMD") call in main(), the assignment menu[CUSTOM] = c, and the call to system(menu[choice]) in run_program().
+
+2. 
+yes, Menu commands can include command line options because run_program() passes the entire menu string to system(). system() passes the command to a shell, so the command can contain arguments/options.
+
+For example, setting:
+
+MENUCMD="/usr/bin/ls -l"
+
+allows the custom command to run ls with the -l option.
+
+This can be tested by running:
+
+MENUCMD="/usr/bin/ls -l" ./3000menu
+
+and selecting the CUSTOM entry. The output should be a long-format directory listing.
+
+
+3. 
+The compiler directive at the start of every function is:
+.cfi_startproc
+At the end of every function it is:
+.cfi_endproc
+For example, run_program() contains .cfi_startproc near the beginning and .cfi_endproc near the end. The same directives appear in choose_program() and main().
+
+4. 
+The if/else statement in run_program() is implemented by these lines:
+
+testl   %eax, %eax
+je      .L2
+leaq    .LC1(%rip), %rdi
+call    puts@PLT
+jmp     .L1
+.L2:
+leaq    .LC2(%rip), %rdi
+call    puts@PLT
+
+The call to system() places its return value in %eax. testl %eax, %eax tests whether that value is zero. The je .L2 jumps to the "Command succeeded." code when the result is zero. If it is not zero, execution continues to the "Command failed." code.
+
+This can be confirmed empirically by setting MENUCMD to a command that succeeds, such as "/usr/bin/true", and then to a command that fails, such as "/usr/bin/false". The first prints "Command succeeded." and the second prints "Command failed.", matching the two branches in the assembly.
+
+
+5. 
+The call to getline() is implemented by:
+
+leaq    16(%rsp), %rsi
+leaq    8(%rsp), %rdi
+movq    stdin(%rip), %rdx
+call    getline@PLT
+
+These instructions prepare the three arguments for getline(): the address of input, the address of n, and stdin. The call to getline@PLT is therefore the actual call to getline().
+
+This can be confirmed empirically with ltrace. Running 3000menu under ltrace shows a call to getline when the program asks "Your choice?". The assembly also directly identifies the function being called as getline@PLT.
+
+
+6. 
+printf calls are translated into two different calls: __printf_chk() and puts().
+
+__printf_chk() is used when printf() needs formatting. For example, the assembly for:
+
+printf("Running %s\n", menu[choice]);
+
+uses:
+
+call    __printf_chk@PLT
+
+because the string contains the %s format specifier.
+
+The calls that only print a fixed string, such as:
+
+printf("Command failed.\n");
+
+are translated into:
+
+call    puts@PLT
+
+because there are no format specifiers and puts() can print the fixed string directly.
+
+This can be seen in run_program(), where "Running %s\n" uses __printf_chk(), while "Command failed." and "Command succeeded." use puts().
+
+7. 
+No, 3000menu.s does not make system calls directly.
+
+The assembly contains calls to library functions such as system@PLT, getline@PLT, getenv@PLT, free@PLT, puts@PLT, and __printf_chk@PLT. These are library functions rather than direct Linux system calls.
+
+For example, run_program() calls:
+
+call    system@PLT
+
+rather than directly invoking the Linux system-call mechanism. There is also no syscall instruction anywhere in the provided 3000menu.s.
+
+This can be checked empirically by searching the assembly with:
+
+grep syscall 3000menu.s
+
+which produces no output. The external calls can also be observed with ltrace.
+
+8. 
+run_program() can be modified to avoid system() by using fork(), execve(), and waitpid(). The child process can execute the selected program using execve(), while the parent waits for the child and checks its exit status.
+
+One possible replacement for run_program() is:
+
+void run_program(int choice)
+{
+        pid_t pid;
+        int status;
+
+        printf("Running %s\n", menu[choice]);
+
+        pid = fork();
+
+        if (pid == 0) {
+                char *args[] = {menu[choice], NULL};
+                char *envp[] = {NULL};
+
+                execve(menu[choice], args, envp);
+                exit(1);
+        } else if (pid > 0) {
+                waitpid(pid, &status, 0);
+
+                if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+                        printf("Command succeeded.\n");
+                } else {
+                        printf("Command failed.\n");
+                }
+        } else {
+                printf("Command failed.\n");
+        }
+
+        return;
+}
+
+This works because fork() creates a child process. The child calls execve() to replace itself with the selected program. If execve() fails, the child exits with a nonzero status. The parent uses waitpid() to wait for the child and then checks its exit status.
+
+The commands in the original menu are absolute paths, such as /usr/bin/ls and /usr/bin/ps, so execve() can execute them directly without needing execvp(). The custom command also needs to be an executable path rather than a shell command containing options, because execve() does not perform shell parsing.
+

@@ -6,8 +6,12 @@ for (let catName of categories) {
  
  
     const h2 = document.createElement('h2');
-    h2.textContent = catName;
- 
+    const arrow = document.createElement('span');
+    arrow.textContent = "▸"; // this is unicode character "\u25B8"
+    arrow.classList.add("arrow");
+    const text = document.createTextNode(" " + catName);
+    h2.append(arrow, text); 
+
     const ul = document.createElement('ul');
  
     cat.appendChild(h2);
@@ -69,6 +73,7 @@ for (let catName of categories) {
     ul.classList.add("hidden");
     h2.addEventListener("click", (e) => {
         ul.classList.toggle("hidden");
+        h2.classList.toggle("open");
     });
  
     const footer = document.querySelector('footer');

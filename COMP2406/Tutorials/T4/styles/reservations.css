@@ -71,3 +71,11 @@ form input[type="submit"]:hover {
 .location-row select {
     flex-grow: 1;
 }
+
+form input[type="submit"]:disabled {
+    background-color: #c8b7a6;
+    color: #0c0c0cb1;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.6;
+}
