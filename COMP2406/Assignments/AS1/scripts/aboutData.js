@@ -1,3 +1,4 @@
+// Data for about.html - read by about.js
 const aboutData = {
   mission: `New Home Animal Rescue is dedicated to connecting loving families with pets in need. 
   We manage multiple animal shelters and foster homes, ensuring that every rescued animal 

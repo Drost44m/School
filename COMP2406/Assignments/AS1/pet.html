@@ -9,42 +9,47 @@
 </head>
 <body>
 
+  <!-- Navigation menu, same on every page -->
   <nav>
     <a href="index.html">Home</a>
     <a href="browse.html" class="selected" aria-current="page">Browse Pets</a>
     <a href="about.html">About Us</a>
   </nav>
 
+  <!-- Banner, same on every page -->
   <div class="banner">
     <h1>Pawsibility</h1>
     <p>Every Paw Deserves a Loving Home</p>
     <img src="images/Banner.jpeg" alt="A newly adopted dog">
   </div>
 
+  <!-- pet.js points this back to browse.html with the right shelter selected -->
   <div class="section back-link">
-    <a href="browse.html">&laquo; Back to Browsing</a>
+    <a id="backLink" href="browse.html">&laquo; Back to Browsing</a>
   </div>
 
+  <!-- All of this is filled in by pet.js, based on the pet chosen in browse.html -->
   <div class="section pet-detail">
-    <img src="images/dog1.jpg" alt="Milo">
-    <h1>Milo</h1>
-    <p>3 year old Beagle Mix (Dog)</p>
-    <p>Health: Vaccinated, Neutered</p>
-    <p>Traits: Friendly, Energetic, Good with kids</p>
-    <p>Days at Shelter: 45</p>
+    <img id="petImage" src="" alt="">
+    <h1 id="petName"></h1>
+    <p id="petSummary"></p>
+    <p id="petHealth"></p>
+    <p id="petTraits"></p>
+    <p id="petDays"></p>
 
-    <p class="fees">
-      Adoption Fee: $180<br>
-      Processing Fee: $40<br>
-      Total: $220
-    </p>
+    <p class="fees" id="petFees"></p>
 
-    <button onclick="location.href='apply.html'">Apply to Adopt this Pet</button>
+    <!-- pet.js sends petId/shelter/fee info to apply.html when clicked -->
+    <button id="applyButton" type="button">Apply to Adopt this Pet</button>
   </div>
 
+  <!-- Footer, same on every page -->
   <footer>
     &copy; 2026 Pawsibility | Every Paw Deserves a Loving Home
   </footer>
+
+  <script src="scripts/shelterData.js"></script>
+  <script src="scripts/pet.js"></script>
 
 </body>
 </html>

@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "48b9347bb2bd1c60",
+        "id": "614215bd9039bad9",
         "type": "tabs",
         "children": [
           {
-            "id": "dd939024555ed6ee",
+            "id": "0e539dabb1b2d537",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "COMP3000/Tutorials/COMP3000-Tutorial-3.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "COMP3000-Tutorial-3"
+              "title": "New tab"
             }
           }
         ]
@@ -188,25 +184,26 @@
       "bases:Create new base": false
     }
   },
-  "active": "dd939024555ed6ee",
+  "active": "0e539dabb1b2d537",
   "lastOpenFiles": [
-    "COMP3000/Assignments/a1/comp3000-a1-michaeldrost.txt",
-    "COMP3000/Assignments/a1/COMP3000-al-michaeldrost.txt",
-    "COMP3000/Assignments/a1",
-    "COMP3000/Assignments",
-    "COMP2406/Tutorials/T4/scripts/reservations.js",
-    "COMP3000/Tutorials/COMP3000-Tutorial-2.md",
+    "COMP2406/Assignments/AS1/README.txt",
+    "COMP3000/Tutorials/COMP3000-Tutorial-4.md",
     "COMP3000/Tutorials/COMP3000-Tutorial-3.md",
+    "COMP2406/Assignments/AS1/scripts/shelterData.js",
+    "COMP2406/Assignments/AS1/scripts/pet.js",
+    "COMP2406/Assignments/AS1/scripts/browse.js",
+    "COMP2406/Assignments/AS1/scripts/apply.js",
+    "COMP2406/Assignments/AS1/scripts/aboutData.js",
+    "COMP2406/Assignments/AS1/scripts/about.js",
+    "COMP2406/Assignments/AS1/scripts",
+    "COMP2406/Assignments/AS1/pet.js",
+    "COMP2406/Assignments/AS1/about.js",
+    "COMP3000/Assignments/a1/comp3000-a1-michaeldrost.txt",
+    "COMP3000/Tutorials/COMP3000-Tutorial-2.md",
     "COMP3000/Tutorials/COMP3000-Tutorial-1.md",
     "Chat.md",
     "COMP2406/Assignments/AS1/images/pawsibility_atWork.jpeg",
     "COMP2406/Assignments/AS1/images/Banner.jpeg",
-    "COMP2406/Assignments/AS1/styles/styles.css",
-    "COMP2406/Assignments/AS1/styles/pet.css",
-    "COMP2406/Assignments/AS1/styles/index.css",
-    "COMP2406/Assignments/AS1/styles/browse.css",
-    "COMP2406/Assignments/AS1/styles/apply.css",
-    "COMP2406/Assignments/AS1/styles/about.css",
     "COMP2406/Assignments/AS1/pawsibility_atWork.jpeg",
     "COMP2406/Assignments/AS1/Banner.jpeg"
   ]

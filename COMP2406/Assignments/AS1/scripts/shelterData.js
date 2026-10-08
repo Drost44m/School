@@ -1,3 +1,4 @@
+// Data for browse.html and pet.html - read by browse.js and pet.js
 const shelters = [
   {
     id: "s1",

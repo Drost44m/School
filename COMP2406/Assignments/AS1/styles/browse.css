@@ -9,6 +9,10 @@
   margin-top: 16px;
 }
 
+#typeButtons[hidden] {
+  display: none;
+}
+
 /* enabled, not selected */
 .type-buttons button {
   background: #fff;

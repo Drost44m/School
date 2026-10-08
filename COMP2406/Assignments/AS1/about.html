@@ -9,33 +9,31 @@
 </head>
 <body>
 
+  <!-- Navigation menu, same on every page -->
   <nav>
     <a href="index.html">Home</a>
     <a href="browse.html">Browse Pets</a>
     <a href="about.html" class="selected" aria-current="page">About Us</a>
   </nav>
 
+  <!-- Banner, same on every page -->
   <div class="banner">
     <h1>Pawsibility</h1>
     <p>Every Paw Deserves a Loving Home</p>
     <img src="images/Banner.jpeg" alt="A newly adopted dog">
   </div>
 
+  <!-- Mission paragraph is filled in by about.js from aboutData.js -->
   <div class="section mission">
     <h1>Our Mission</h1>
-    <p>
-      New Home Animal Rescue is dedicated to connecting loving families with pets in need.
-      We manage multiple animal shelters and foster homes, ensuring that every rescued animal
-      receives medical care, socialization, and a safe, loving environment while waiting for adoption.
-      Our mission is not just to rehome animals, but to educate and support adopters, advocate for
-      animal welfare, and create a community where pets and people thrive together.
-    </p>
+    <p id="missionText"></p>
     <img src="images/pawsibility_atWork.jpeg" alt="Employees caring for animals at the shelter">
   </div>
 
+  <!-- Team description and table rows are filled in by about.js from aboutData.js -->
   <div class="section team">
     <h1>Our Team</h1>
-    <p>Meet the team behind New Home Animal Rescue</p>
+    <p id="teamDescription"></p>
     <table>
       <thead>
         <tr>
@@ -45,44 +43,18 @@
           <th>Qualifications</th>
         </tr>
       </thead>
-      <tbody>
-      <tr>
-        <td>Dr. Pawla Clawson</td>
-        <td>Chief Veterinarian</td>
-        <td>12 years in veterinary medicine, specializing in small animals</td>
-        <td>DVM, Animal Behavior Certification</td>
-      </tr>
-      <tr>
-        <td>Barkley Whiskers</td>
-        <td>Operations Manager</td>
-        <td>10 years managing multiple animal shelters</td>
-        <td>BA in Animal Welfare Management</td>
-      </tr>
-      <tr>
-        <td>Furby Pawsworth</td>
-        <td>Foster Coordinator</td>
-        <td>8 years coordinating foster programs</td>
-        <td>Certified Animal Care Specialist</td>
-      </tr>
-      <tr>
-        <td>Lola Finch</td>
-        <td>Adoption Specialist</td>
-        <td>7 years helping families find the right pets</td>
-        <td>BA in Psychology, Certified Animal Behaviorist</td>
-      </tr>
-      <tr>
-        <td>Meowgan Fetcher</td>
-        <td>Veterinary Technician</td>
-        <td>9 years in veterinary support and medical care</td>
-        <td>CVT, Animal Emergency Care Certification</td>
-      </tr>
-      </tbody>
+      <!-- One row per team member, added by about.js -->
+      <tbody id="teamTableBody"></tbody>
     </table>
   </div>
 
+  <!-- Footer, same on every page -->
   <footer>
     &copy; 2026 Pawsibility | Every Paw Deserves a Loving Home
   </footer>
+
+  <script src="scripts/aboutData.js"></script>
+  <script src="scripts/about.js"></script>
 
 </body>
 </html>
