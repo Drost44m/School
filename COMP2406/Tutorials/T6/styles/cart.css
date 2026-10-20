@@ -1,0 +1,51 @@
+/* Table of items */
+#cart-table {
+    margin: 20px auto;
+    width: 60%;
+}
+#cart-items li {
+    font-size: 14pt;
+    padding: 8px;
+    border-bottom: 1px solid #805231;
+}
+#cart-total {
+    margin-top: 20px;
+    font-size: 18pt;
+}
+.divider-row td {
+    border-top: 2px solid #805231;
+    padding-top: 10px;
+}
+
+
+/* Place Order button */
+#place-order-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 14pt;
+    font-weight: bold;
+    background-color: #A46B3E;
+    color: white;
+    border: 1px solid #805231;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease;
+    box-shadow: 2px 2px 0px #805231;
+}
+#place-order-btn:hover {
+    background-color: #905C2D;
+}
+#place-order-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0px 0px 0px #805231;
+}
+.hidden {
+    display: none !important; /* The class less less priority than the id, so this makes it more important to follow */
+}
+
+/* Message to be display after placing order */
+#order-message {
+    margin-top: 15px;
+    font-weight: bold;
+}

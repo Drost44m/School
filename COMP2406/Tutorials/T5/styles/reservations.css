@@ -79,3 +79,7 @@ form input[type="submit"]:disabled {
 .location-row select {
     flex-grow: 1;
 }
+
+.hidden {
+    display: none;
+}

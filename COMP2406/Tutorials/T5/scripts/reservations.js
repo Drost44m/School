@@ -5,6 +5,14 @@ const time = document.getElementById('time');
 const guests = document.getElementById('guests');
 const submit = document.querySelector('input[type="submit"]');
 
+// Populate the Select box with the location options
+for (let i=0; i<locations.length; i++) {
+    const loc = locations[i];
+    const option = document.createElement("option");
+    option.value = loc.name1 + " – " + loc.name2;
+    option.textContent = loc.name1 + " – " + loc.name2;
+    restLocation.appendChild(option);
+}
 
 function updateState() {
     const selected = (restLocation.value !== "");
@@ -147,6 +155,40 @@ document.querySelector("form").addEventListener("submit", async function (e) {
     };
 })
 
+document.getElementById("location").addEventListener("change", async function (e) {
+    const p = document.getElementById("patio-message");
+    if (this.selectedIndex > 0) {
+        p.classList.remove("hidden");
+    }
+    else {
+        p.classList.add("hidden");
+        p.textContent = "";
+    }
+    // Get the location and its coordinates
+    try {
+        const theLocation = locations[this.selectedIndex - 1];
+        const lat = theLocation.latitude;
+        const lon = theLocation.longitude;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto&forecast_days=2`;
+       
+        const result = await fetch(url);
+        const data = await result.json();
+        const temp = data.daily.temperature_2m_max[1];
+        const rain = data.daily.precipitation_sum[1];
+ 
+        if (rain > 1)
+            p.textContent = "🌧 Patio Tomorrow: May be Closed (rain expected)";
+        else if (temp > 18)
+            p.textContent = "🌞 Patio Tomorrow: Fun in the Sun (max " + temp + "°C)";
+        else if (temp >= 8)
+            p.textContent = "🧥 Patio Tomorrow: Light Jacket Weather (max " + temp + "°C)";
+        else
+            p.textContent = "🥶 Patio Tomorrow: Closed (max " + temp + "°C)";
+    } catch(error) {
+        p.textContent = "";
+        p.classList.add("hidden");
+    }
+});
 
 
 

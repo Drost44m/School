@@ -65,3 +65,46 @@ h2.open .arrow {
   transform: rotate(90deg);
 }
 
+
+/* For the Add to Cart */
+a.order-button {
+    color: #805231;              
+    font-weight: bold;
+    font-style: italic;
+    font-size: 12pt;
+    text-decoration: none;    
+    display: inline-block;      
+    background-color: white;
+    border: 1px solid #805231;
+    border-radius: 10px;
+    padding: 5px 10px;
+    max-width: 90px;
+    cursor: pointer;
+}
+a.order-button:hover {
+    color: #FFFFFF;
+    background-color: #905C2D;
+}
+
+/* Add these to properly place Add Cart button */
+header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+header img {
+    width: 100%;
+    height: auto;
+    flex-basis: 100%;
+}
+.nav-links {
+    flex: 1;
+    text-align: center;
+}
+.nav-links a {
+    display: inline-block;
+    margin: 15px 10px;
+}
+.cart-button {
+    margin-left: auto;
+}

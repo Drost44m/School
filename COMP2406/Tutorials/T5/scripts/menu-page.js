@@ -36,6 +36,9 @@
     footer.before(cat);
 }*/
 
+// This will hold the ID of all menu items added to the cart
+const cart = [];
+const cartButton = document.getElementById("view-cart");
 
 for (let catName of categories) {
     const cat = document.createElement('div');
@@ -86,6 +89,17 @@ for (let catName of categories) {
 
         // Add the <li> to the page inside the first <ul>
         ul.appendChild(li);
+
+        // Fake order test
+        const order = document.createElement('a');
+        order.id = item.id;
+        order.textContent = "Add to Cart";
+        order.classList.add("order-button");
+        order.addEventListener("click", () => {
+            cart.push(order.id);
+            cartButton.textContent = `View Cart (${cart.length})`;
+        });
+        div.appendChild(order);
     }
 
     ul.classList.add("hidden");
@@ -98,3 +112,19 @@ for (let catName of categories) {
     footer.before(cat);
 }
 
+ cartButton.addEventListener("click", async function (e) {
+    const itemNames = cart.map(id =>
+        menuItems.find(item => item.id === id).name).join(", ");
+    const cost = cart.reduce((sum, id) => { return sum + menuItems.find(menuItem => menuItem.id === id).price;}, 0);
+    let url = `https://httpbin.org/get`;
+    url = url + `?items=${encodeURIComponent(itemNames)}`;
+    url = url + `&total=$${encodeURIComponent(cost)}`;
+    try {
+        const response = await fetch(url);
+        const params = new URL(response.url).searchParams;
+        console.log(params.get("items"));
+        console.log(params.get("total"));
+    } catch (error) {
+        console.error(error);
+    }
+});

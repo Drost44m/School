@@ -19,19 +19,13 @@
 
         <h1>Make a Reservation</h1>
         <p>Please select a restaurant location and complete the form below to reserve your table.</p>
-
+        <p class="hidden" id="patio-message">Patio Weather Tomorrow</p>
      
         <form>
             <div class="location-row">
                 <label for="location">Location:</label>
                 <select name="location" id="location" required>
                     <option value="">-- Choose an Option --</option>
-                    <option value="Ottawa - Downtown">Ottawa – Downtown</option>
-                    <option value="Toronto - Downtown">Toronto – Downtown</option>
-                    <option value="Toronto - Harbourfront">Toronto – Harbourfront</option>
-                    <option value="Montreal - Plateau">Montreal – Plateau</option>
-                    <option value="Montreal - Old Port">Montreal – Old Port</option>
-                    <option value="Gatineau - Alymer">Gatineau – Aylmer</option>
                 </select>
             </div>
             <label for="name">Name:</label>
@@ -66,7 +60,7 @@
             <a href="#">Privacy Policy</a>
             <a href="#">Terms of Service</a>
         </footer> 
-
+        <script src="data/locations.js"></script>
         <script src="scripts/reservations.js"></script>
     </body>
 </html>

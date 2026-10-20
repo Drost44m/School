@@ -1,0 +1,111 @@
+COMP 3000 2026F Assignment 2
+Name: Michael Drost
+Student ID: 101317132
+
+Collaborators/AI:some chatgpt to explain man pages, concepts.  man pages: fork(), execve(), wait(), sigaction(), setuid(), seteuid(), getpwnam(), getpwuid(), strtol(), open(), dup2(), getline() also used strace and gcc
+
+1. "Change user", "pinfo" and "QUIT". choice_loop() handles these three directly with strcmp() and never calls run_chosen_program().  Confirmed with strace -f: choosing pinfo produced no clone/execve, while /usr/bin/id did.
+
+2. Nothing beyond passing them on. uses extern char **environ and passes it unchanged to execve() as envp, so every program it runs inherits a copy of 3000menu2's environment. never reads or modifies any variable (not even PATH, since execve() doesn't search PATH and the menu uses absolute paths).
+
+
+3. It finds out right away: when the child exits the kernel sends SIGCHLD, and signal_handler() calls wait() and saves the pid and status in global variables. It only reports this later, when handle_exited_process() runs at the top of the choice_loop() loop, i.e. just before the menu is printed again, after the user makes their next choice and that action finishes.
+
+
+4. /usr/bin/top. top is a  full-screen program that redraws the screen and reads keystrokes from the terminal. In the background it keeps doing this while the menu also prints and reads from the same terminal, so the display gets overwritten and keystrokes go to either top or the menu. top never exits by itself, so it keeps running even after QUIT.
+
+
+5. Yes. If the binary is owned by root and setuid (chmod u+s), it runs with euid 0. pinfo shows this: as a normal user the plain binary printed euid=30033, the setuid-root copy printed euid=0. Programs run normally still run as the real user because run_program() drops privileges with setegid()/seteuid() in the child. But become() uses setgid()/setuid(), which only works with root privileges, so changing user only works when the binary is setuid root.
+
+
+6.
+void change_user(void)
+{
+        char *input = NULL;
+        size_t n = 0;
+
+        printf("User to run programs as (blank for yourself): ");
+        if (getline(&input, &n, stdin) <= 0) {
+                free(input);
+                return;
+        }
+        input[strcspn(input, "\n")] = '\0';
+
+        free(become_user);
+        if (input[0] == '\0') {
+                free(input);
+                become_user = NULL;
+        } else {
+                become_user = input;
+        }
+}
+
+Then make the binary setuid root: 'sudo chown root 3000menu2' and 'sudo chmod u+s 3000menu2'
+It won't always work. without setuid root (or running as root), setgid()/setuid() fail with EPERM. the user has to also exist or getpwnam() fails. Also, if become() fails, the child returns instead of exiting and ends up running a second copy of the menu, so that return should be changed to exit(127).
+
+
+7. In become(), if getpwnam() finds nothing and the string is all digits, look it up as a uid with getpwuid():
+
+        char *end;
+        long uid;
+
+        pw_entry = getpwnam(username);
+        if (pw_entry == NULL) {
+                uid = strtol(username, &end, 10);
+                if (*username != '\0' && *end == '\0')
+                        pw_entry = getpwuid((uid_t) uid);
+        }
+        if (pw_entry == NULL) {
+                fprintf(stderr, "Could not find user %s.\n", username);
+                return -1;
+        }
+
+
+8. run_program() already supports output redirection. run_chosen_program() just always passes NULL. In run_chosen_program(), add:
+
+        printf("Redirect output to file (blank for none): ");
+        result = getline(&stdout_fn, &n, stdin);
+        stdout_fn[strcspn(stdout_fn, "\n")] = '\0';
+        if (stdout_fn[0] == '\0') {
+                free(stdout_fn);
+                stdout_fn = NULL;
+        }
+
+then pass it in the call:
+
+        run_program(all_args, background, stdout_fn, environ, become_user);
+        free(stdout_fn);
+
+
+9. Copy the stdout approach. Add a stdin_fn parameter to run_program():
+
+void run_program(char *args[], int background, char *stdin_fn,
+                 char *stdout_fn, char *envp[], char *new_user)
+
+In the child, before the stdout redirection, open the file and dup2() it onto fd 0:
+
+                if (stdin_fn != NULL) {
+                        fd = open(stdin_fn, O_RDONLY);
+                        if (fd < 0) {
+                                perror(stdin_fn);
+                                exit(127);
+                        }
+                        dup2(fd, 0);
+                        close(fd);
+                }
+
+
+        printf("Redirect input from a file (blank for none): ");
+        result = getline(&stdin_fn, &n, stdin);
+        stdin_fn[strcspn(stdin_fn, "\n")] = '\0';
+        if (stdin_fn[0] == '\0') {
+                free(stdin_fn);
+                stdin_fn = NULL;
+        }
+
+and update the call:
+
+        run_program(all_args, background, stdin_fn, stdout_fn,
+                    environ, become_user);
+        free(stdin_fn);
+        free(stdout_fn);
