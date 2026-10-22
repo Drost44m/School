@@ -53,3 +53,5 @@ const locations = [ {
         phone: "(819) 555-0606"
     }
 ];
+
+module.exports = locations;

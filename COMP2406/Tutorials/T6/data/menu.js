@@ -186,5 +186,5 @@ const menuItems = [
 
 const categories = [ 'Appetizers', 'Mains', 'Desserts', 'Drinks' ];
 
-//module.exports = { categories, menuItems };
+module.exports = { categories, menuItems };
 

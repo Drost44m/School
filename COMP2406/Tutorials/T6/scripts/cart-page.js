@@ -23,18 +23,29 @@ function renderCart() {
 }
 
 // Handle the placing of an order
-function placeOrder() {
+async function placeOrder() {
     const message = document.getElementById("order-message");
 
     // Send the order to the server via route:  POST /order
-    // ...
+    // Build the order as an array of IDs
+    const order = cart.map(item => item.id);
+    try {
+        await fetch("/order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(order)
+        });
+        // Clear the cart
+        cart = [];
+        localStorage.setItem("cart", JSON.stringify(cart));
 
-    // Clear the cart
-    cart = [];
-    localStorage.setItem("cart", JSON.stringify(cart));
+        // Display a message to explain what happened
+        message.textContent = "Order placed successfully!";
 
-    // Display a message to explain what happened
-    message.textContent = "Order placed successfully!";
+    } catch (error) {
+        message.textContent = "Something went wrong! Please try again.";
+        message.classList.add("error");
+    }
     message.classList.remove("hidden");
     document.getElementById("place-order-btn").classList.add("hidden");
 }

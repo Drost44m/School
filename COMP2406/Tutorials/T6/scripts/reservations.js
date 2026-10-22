@@ -129,9 +129,9 @@ document.querySelector("form").addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const data = Object.fromEntries(new FormData(this));
-
+    const msg = document.getElementById("reservation-message");
     try {
-        const response = await fetch("https://httpbin.org/post", {
+        const response = await fetch("http://localhost:3000", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
@@ -145,15 +145,37 @@ document.querySelector("form").addEventListener("submit", async function (e) {
                 throw new Error("Request failed with status: ", response.status);
             }
         }
-        const result = await response.json(); // This could throw an error
-        console.log(result.json);
+
+        const html = await response.text();
+        document.body.innerHTML = html;
+        
+        /*const result = await response.json(); // This could throw an error
+        console.log(result);
+
+        // Clear the form and update the status of all fields
+        document.querySelector("form").reset();
+        updateState();
+
+        // Inform the user that the reservation was successful
+        msg.textContent = "Reservation successfully submitted!";
+        msg.style.color = "green";
+        msg.classList.remove("hidden"); */
+
     } catch(error) {
         if (error.name === "TypeError") {
             console.error("Network error (no connection or server unreachable)");
         } else {
             console.error("Request error:", error.message);
         }
+        // Inform the user that something went wrong
+        msg.textContent = "Something went wrong. Please try again.";
+        msg.style.color = "red";
+        msg.classList.remove("hidden");
     }
+    
+    setTimeout(() => {
+        msg.classList.add("hidden");
+    }, 3000);
 });
 
 document.getElementById("location").addEventListener("change", async function (e) {
