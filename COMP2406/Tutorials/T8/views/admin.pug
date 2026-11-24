@@ -1,0 +1,38 @@
+- var title = "The Laughing Ladle – Admin"
+- var style = "styles/admin.css"
+include partials/header
+
+h1 Menu Administration
+p (Edit or delete menu items)
+
+- for (let catName of categories)
+    div.menu-category
+        h2= catName
+        table.menu-table
+            thead
+                tr
+                    th ID
+                    th Name
+                    th Price ($)
+                    th Description
+                    th Image
+                    th Editing Operation
+            tbody
+                - let catItems = menuItems.filter(item => item.category === catName)
+                - for (let item of catItems)
+                    tr(data-id=item.id)
+                        td= item.id
+                        td
+                            input(type="text" name="name" value=item.name)
+                        td
+                            input(type="number" name="price" value=item.price step="0.01")
+                        td
+                            textarea(name="description")= item.description
+                        td
+                            input(type="text" name="image" value=item.image)
+                        td.actions
+                            button.save(data-id=item.id) Save Changes
+                            button.delete(data-id=item.id) Delete From Menu
+
+- var script = "scripts/admin-menu-page.js"
+include partials/footer

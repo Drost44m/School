@@ -1,0 +1,36 @@
+include header
+
+main.applications-main
+  h1 Submitted Applications
+  .applications-card
+    table.applications-table
+      thead
+        tr
+          th Date
+          th Application ID
+          th Shelter ID
+          th Pet ID
+          th Pet Type
+          th Status
+      tbody#applicationsTableBody
+        each app in applications
+          tr
+            td= app.date
+            td
+              | #{app.applicationId}
+              button.view-btn(data-id=app.applicationId) View
+            td= app.shelterId
+            td= app.petId
+            td= app.petType
+            td(class="status-" + app.status)
+              select(class="status-select status-" + app.status data-id=app.applicationId)
+                each st in ["Unprocessed", "Pending", "Approved", "Rejected"]
+                  option(value=st selected=(st === app.status))= st
+
+  .application-details-section
+    .applications-card
+      #applicationDetails
+
+script(src="/js/applications.js")
+
+include footer

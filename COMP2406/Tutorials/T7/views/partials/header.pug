@@ -1,0 +1,21 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        title= title
+        link(rel="stylesheet", href="styles/style.css")
+        if typeof style !== "undefined"
+            link(rel="stylesheet", href=style)
+    body
+        // Header
+        header
+            // Navigation Links
+            img(src="images/banner.jpg", alt="restaurant name banner")
+            div.nav-links
+                a(href="/") Home
+                a(href="/menu") Menu
+                a(href="/locations") Locations
+                a(href="/reservations") Reservations
+            if typeof showCartButton !== "undefined" 
+                a.order-button.cart-button#view-cart(href="/cart")
+                    View Cart (0)

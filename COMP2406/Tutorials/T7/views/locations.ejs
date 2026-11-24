@@ -1,0 +1,28 @@
+<%- include("partials/header", { title: "The Laughing Ladle - Locations", style: "styles/locations.css" }) %>
+        <h1>Our Locations</h1>
+
+        <!-- This table will be populated from a script -->
+        <table id="locationsTable">
+                <% for (let rowStart=0; rowStart<locations.length; rowStart+=3) { %>
+                <tr>
+                        <% for (let i=rowStart; i<rowStart+3; i++) { %>
+                        <% const loc = locations[i]; %>
+                        <td>
+                                <h2>
+                                <%= loc.name1 %> <br>
+                                <%= loc.name2 %>
+                                </h2>
+                                <p id="details<%=i%>">
+                                <%= loc.street %> <br>
+                                <%= loc.cityProv %> <br>
+                                Phone: <%= loc.phone %>
+                                </p>
+                        </td>
+                        <% } %>
+                </tr>
+                <% } %>
+        </table>
+        <script>
+                const locations = <%- JSON.stringify(locations); %>
+        </script>
+<%- include("partials/footer", {script: "scripts/locations-page.js"}) %>

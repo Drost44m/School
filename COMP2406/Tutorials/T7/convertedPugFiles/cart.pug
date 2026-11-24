@@ -1,0 +1,28 @@
+- var title = "The Laughing Ladle – Cart"
+- var style = "styles/cart.css"
+include partials/header
+
+    h1 Your Cart
+    p Review your selected items before placing your order.
+
+    div.menu-category
+        table#cart-table
+            tbody#cart-items
+                // JS inserts item rows here
+                tr.blank-row
+                    td(colspan="2")
+            tbody
+                tr
+                    td(style="text-align:left;") HST (13%)
+                    td#hst(style="text-align:right;") $0.00
+                tr.divider-row
+                    td(colspan="2")
+                tr
+                    td(style="text-align:left;") strong Total
+                    td#cart-total(style="text-align:right;") strong $0.00
+
+        a#place-order-btn Place Order
+        p.hidden#order-message
+
+- var script = "scripts/cart-page.js"
+include partials/footer

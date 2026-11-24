@@ -1,0 +1,27 @@
+- var title = "The Laughing Ladle – Menu"
+- var style = "styles/menu.css"
+- var showCartButton = 1
+include partials/header
+
+    h1 Menu
+    p (Select category to view menu items)
+    // The Categories and their Menu Items will be inserted here from JS code
+
+    for (let catName of categories)
+        div.menu-category = catName === 'Drinks' ? 'drink' : '' 
+            h2
+                span.arrow ▸ = catName
+            ul.hidden
+                // Loop through all menu items that belong to this category
+                let catItems = menuItems.filter(item => item.category === catName);
+                for (let item of catItems)
+                    li
+                        img(src="= item.image", alt="menu item = item.name")
+                        div
+                            span.name = item.name
+                            span.price $= item.price
+                            p = item.description
+                            a.order-button.add-to-cart(data-item="= JSON.stringify(item)") Add to Cart
+
+- var script = "scripts/menu-page.js"
+include partials/footer

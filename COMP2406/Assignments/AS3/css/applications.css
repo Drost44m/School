@@ -1,0 +1,176 @@
+.applications-main {
+    max-width: 1000px;
+    margin: 0px auto;
+    padding: 20px;
+}
+.applications-main h1 {
+    text-align: center;
+    color: #ea6608dd;
+    margin-bottom: 20px;
+}
+
+
+/* Card container for table */
+.applications-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    padding: 20px 25px;
+}
+
+
+/* Table styling */
+.applications-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+.applications-table thead {
+    background: #A9724B;
+    color: white;
+}
+.applications-table th {
+    padding: 12px 10px;
+    text-align: center;
+    border: 2px solid white;
+    border-bottom: 2px solid #2c2c2c;
+}
+.applications-table td {
+    padding: 10px;
+    text-align: center;
+    border: 2px solid #2c2c2c;
+}
+.applications-table td:first-child, .applications-table th:first-child {
+    border-left: none; /* Remove left border on first cell in each row */
+}
+.applications-table td:last-child, .applications-table th:last-child {
+    border-right: none; /* Remove right border on last cell in each row */
+}
+.applications-table tbody tr:nth-child(even) { /* Zebra striping */
+    background: #f9f9f9; 
+}
+
+
+/* Make the status dropdown look clean inside the table */
+.applications-table select.status-select {
+    font-weight: bold;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    color: #111;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;   /* horizontal center */
+}
+
+/* Remove default select arrow background on some browsers */
+.applications-table select.status-select:focus {
+    outline: none;
+}
+
+/* Status colors */
+.status-Unprocessed {
+    background: #a6cff8;
+    font-weight: bold;
+}
+.status-Pending {
+    background: #f6f67e;
+    font-weight: bold;
+}
+.status-Approved {
+    background: #85ff85;
+    font-weight: bold;
+}
+.status-Rejected {
+    background: #f4695a;
+    font-weight: bold;
+}
+
+
+/* Application Details */
+.application-details-section {
+    margin-top: 10px;
+}
+#applicationDetails {
+    margin-top: 10px;
+}
+.details-layout {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    line-height: 1;
+}
+.details-col {
+    vertical-align: top;
+    width: 50%;
+    padding: 10px 20px 10px 0;
+}
+.details-card {
+    border: 1px solid #ccc;
+    padding: 0px 20px 20px 20px;
+    border-radius: 10px;
+    background: #eaedef;
+    width: 100%;
+    max-width: 950px;
+    box-sizing: border-box;
+}
+.details-card h4 {
+    margin-top: 24px;
+    border-bottom: 1px solid #999;
+    border-top: 1px solid #999;
+    padding-top: 10px;
+    padding-left: 20px;
+    padding-bottom: 10px;
+    margin-left: -20px;
+    margin-right: -40px;
+    color: #2c3e50;
+    background: #cecece;
+}
+.pet-requested-layout {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: -18px;
+    margin-bottom: -60px;
+}
+.pet-text {
+    vertical-align: top;
+    padding-right: 15px;
+}
+.pet-image-cell {
+    vertical-align: top;
+    text-align: right; /* pushes image to right edge */
+}
+.pet-image {
+    display: block;
+    margin-top: 10px;
+    width: 120px;
+    height: 120px;
+    object-fit: cover; /* ensures it fills the box without stretching */
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    text-align: right;
+
+    /* Right-align in the table cell */
+    display: block;
+    margin-left: auto;
+}
+.view-btn {
+    background: #A9724B;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s ease;
+}
+.view-btn:hover {
+    background: #ea6608dd;
+}
+.view-btn.active {
+    background: #ffea00; 
+    color: black;
+    font-weight: bold;
+    border: 1px solid #A9724B;
+}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title><%= title %></title>
+        <link rel="stylesheet" href="styles/style.css">
+        <% if (typeof style !== 'undefined') { %>
+            <link rel="stylesheet" href="<%= style %>">
+        <% } %>
+    </head>
+    <body>
+        <!-- Header -->
+        <header>
+            <!-- Navigation Links -->
+            <img src="images/banner.jpg" alt="restaurant name banner">
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/menu">Menu</a>
+                <a href="/locations">Locations</a>
+                <a href="/reservations">Reservations</a>
+            </div>
+            <% if (typeof showCartButton !== 'undefined') { %>
+                <a href="/cart" id="view-cart" class="order-button cart-button">View Cart (0)</a>
+            <% } %>
+        </header>

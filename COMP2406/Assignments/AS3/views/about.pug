@@ -1,0 +1,27 @@
+include header
+
+section.about-mission
+  h2 Our Mission
+  p#mission-text= about.mission
+
+section.about-team
+  img#team-img(src="/images/aboutUs.jpg" alt="About New Home Animal Rescue")
+
+  h2 Our Team
+  p#team-description= about.teamDescription
+
+  #team-grid.team-grid
+    each member in about.team
+      .team-card
+        h3= member.name
+        p
+          strong Role:
+          |  #{member.role}
+        p
+          strong Experience:
+          |  #{member.experience}
+        p
+          strong Qualifications:
+          |  #{member.qualifications}
+
+include footer

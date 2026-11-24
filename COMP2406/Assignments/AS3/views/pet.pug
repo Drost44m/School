@@ -1,0 +1,38 @@
+include header
+
+section#petDetailsContainer
+  if !pet
+    p.error Pet not found.
+  else
+    .pet-detail-card
+      img.pet-detail-image(src="/" + pet.image alt=pet.name)
+      h2= pet.name
+      p #{pet.age} year old #{pet.breed} (#{pet.type})
+      p
+        strong Health:
+        |  #{pet.health}
+      if pet.traits.length
+        ul
+          each t in pet.traits
+            li= t
+      else
+        br
+      p
+        strong Days at Shelter:
+        |  #{pet.daysAtShelter}
+      hr
+      p
+        strong Adoption Fee:
+        |  $#{pet.adoptionFee}
+      p
+        strong Processing Fee:
+        |  $#{processingFee}
+      p
+        strong Total (before taxes):
+        |  $#{totalFee}
+      a.apply-button(href="/apply?petId=" + pet.id + "&shelterId=" + shelterId) Apply to Adopt this Pet
+a#back-button
+  if shelterId
+    a.back-link(href="/browse?shelterId=" + shelterId) Back to Browsing
+
+include footer

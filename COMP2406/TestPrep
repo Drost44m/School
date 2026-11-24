@@ -1,0 +1,849 @@
+Node.js Tutorial 6
+==============================================
+
+HOW TO READ THESE NOTES
+  Every block headed "[ FILE, lines a-b ]" is copied verbatim (unchanged) from that file in
+  Tutorials/ (paths below are relative to Tutorials/). Line numbers refer to the file as it is now.
+  Blocks headed "[ my own illustration - NOT from your files ]" are small examples I wrote.
+
+
+1. SKELETON OF A NON-EXPRESS SERVER
+-----------------------------------
+Every request MUST end with response.end(...) or the browser hangs.
+Use `return response.end(...)` so you don't fall through to later ifs.
+Check BOTH method and pathname.
+  url.pathname -> "/menu" (no query string);  url.searchParams.get("id") for ?id=AR1
+
+[ T6/server.js, lines 1-6 ]  imports and port
+```
+let http = require('http');
+let fs = require('fs');
+let path = require("path");
+const locations = require("./data/locations");
+const {categories, menuItems} = require("./data/menu");
+let PORT = 3000;
+```
+
+[ T6/server.js, lines 52-53 ]  start of the request handler, building a URL object
+```
+function requestListener(request, response) {
+    const url = new URL(request.url, `http://${request.headers.host}`); //url.pathname maybe needed here too
+```
+
+[ T6/server.js, lines 127-128 ]  start the server
+```
+http.createServer(requestListener).listen(PORT);
+console.log(`Server is running on http://localhost:${PORT}`);
+```
+
+
+2. SERVING STATIC FILES (+ reading files, adjusting the file path)
+------------------------------------------------------------------
+[ T6/server.js, lines 7-14 ]  file extension -> Content-Type
+```
+const mimeTypes = {
+    ".html": "text/html",
+    ".css":  "text/css",
+    ".js":   "application/javascript",
+    ".png":  "image/png",
+    ".jpg":  "image/jpeg",
+    ".ico":  "image/x-icon"
+};
+```
+
+[ T6/server.js, lines 21-39 ]  read a file with fs.readFile, 404 if missing, 500 for other errors
+```
+// Serve a static file
+function serveStaticFile(filePath, response) {
+    fs.readFile(filePath, (err, data) => {
+        if (err) {
+            if (err.code === "ENOENT") {
+                response.writeHead(404);
+                response.end("File Not Found");
+            }
+            else {
+                response.writeHead(500);
+                response.end("Cannot Read File");
+            }
+        } else {
+            const ext = path.extname(filePath);
+            response.writeHead(200, {'Content-Type': mimeTypes[ext]});
+            response.end(data);
+        }
+    });
+}
+```
+  - data is a Buffer, send it as is (do NOT toString() images).
+  - err.code === "ENOENT" means the file does not exist.
+  - path.extname("a/b/style.css") -> ".css", used to pick the Content-Type.
+
+[ T6/server.js, lines 72-92 ]  GET: map pretty URLs to files, otherwise treat the pathname as the file path
+```
+    // Handle a GET request for an HTML page
+    if (request.method === "GET") {
+        const routes = {
+            "/": "index.html",
+            "/cart": "cart.html",
+            "/menu": "menu.html",
+            "/locations": "locations.html",
+            "/contact": "contact.html",
+            "/reservations": "reservations.html"
+        };
+        // Check if request is for a page and map it to the correct filename
+        let filePath = routes[url.pathname];
+ 
+        // If the filePath is undefined, this must be a non-HTML resource
+        if (!filePath)
+            filePath = url.pathname;
+ 
+        filePath = path.join(__dirname, filePath);  
+
+        serveStaticFile(filePath, response);
+    }
+```
+  - __dirname = folder containing server.js.
+  - path.join(__dirname, "/styles/style.css") -> ".../T6/styles/style.css"
+  - Page links such as <link rel="stylesheet" href="styles/style.css"> make the browser request
+    GET /styles/style.css, which falls into the `filePath = url.pathname` branch.
+
+
+3. SENDING JSON TO THE CLIENT (GET API routes)
+----------------------------------------------
+[ T6/server.js, lines 56-71 ]  set the JSON header, send JSON.stringify(...)
+```
+    // Handle the route: /api/menu
+    if ((request.method === "GET") && (url.pathname === "/api/menu")) {
+        const id = url.searchParams.get("id");
+        let result;
+        if (!id)
+            result = { categories: categories, menuItems: menuItems };
+        else
+            result = menuItems.find(item => item.id === id);
+        response.writeHead(200, { "Content-Type": "application/json" });
+        return response.end(JSON.stringify(result));
+    }
+     // Handle the route: /api/locations
+    if ((request.method === "GET") && (url.pathname === "/api/locations")) {
+        response.writeHead(200, { "Content-Type": "application/json" });
+        return response.end(JSON.stringify(locations));
+    }
+```
+  - Header:  "Content-Type": "application/json"
+  - end() needs a string/Buffer, so use JSON.stringify(object)
+  - Client reads it with  await (await fetch("/api/menu")).json()
+
+
+4. RECEIVING JSON FROM THE CLIENT (POST): READING THE BODY IN CHUNKS
+--------------------------------------------------------------------
+The body arrives in pieces: append every chunk on 'data', use the result only on 'end'.
+
+[ T6/server.js, lines 40-50 ]  read chunks until the end, then call the callback with the full body
+```
+ // Helper function to read a request body
+ function readRequestBody(req, callback) {
+    let body = ""
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    })
+    // Once the entire body is ready, process the request
+    req.on('end', () => {
+        callback(body);
+    });
+}
+```
+
+[ T6/server.js, lines 93-123 ]  parse the body, handle each POST route, answer with HTML or JSON
+```
+    //Handle the POST request
+    if (request.method === "POST") {
+        // Handle the processing of the request body
+        readRequestBody(request, (body) => {
+            // Convert the JSON string into an object
+            const incomingData = JSON.parse(body);
+            if(url.pathname === "/") {
+                // Give the reservation an ID and then store it
+                incomingData.id = nextReservationID++;
+                reservations.push(incomingData);
+                console.log("Current reservations:", reservations);
+                // Send a response
+                serveStaticFile(path.join(__dirname, "reservationResponse.html"), response);
+            }
+            if(url.pathname === "/order") {
+                //Give the order an ID and the store it. 
+                orders.push({id: nextOrderID++, items: incomingData});
+                console.log("Current orders:", orders);
+                // Send a response
+                response.writeHead(200, { "Content-Type": "application/json" });
+                response.end(JSON.stringify(
+                    {
+                        "success": true,
+                        "message": "Order placed successfully",
+                        "data": orders[orders.length - 1]
+                    }
+                ));
+            }
+        });
+        return;
+    }
+```
+  - JSON.parse(body) turns the string into an object (it throws if the JSON is invalid).
+  - POST "/" answers with an HTML file; POST "/order" answers with JSON.
+
+[ my own illustration - NOT from your files ]  safer parsing: 400 on bad JSON, 404 on unknown route
+    let data;
+    try { data = JSON.parse(body); }
+    catch (e) {
+        response.writeHead(400, { "Content-Type": "text/plain" });
+        return response.end("Bad Request: invalid JSON");
+    }
+    // ... known routes ...
+    response.writeHead(404);
+    response.end("Not Found");
+
+Round trip summary
+    CLIENT                                         SERVER
+    JSON.stringify(obj) as body                    body += chunk.toString()   (on 'data')
+    header Content-Type: application/json          on 'end': JSON.parse(body)
+    response.json()  <-----------------------      writeHead(200, {"Content-Type": ...}); end(JSON.stringify(x))
+
+
+5. CLIENT SIDE: SENDING JSON WITH fetch (async/await)
+-----------------------------------------------------
+[ T6/scripts/cart-page.js, lines 25-50 ]  POST a JSON array to /order
+```
+// Handle the placing of an order
+async function placeOrder() {
+    const message = document.getElementById("order-message");
+
+    // Send the order to the server via route:  POST /order
+    // Build the order as an array of IDs
+    const order = cart.map(item => item.id);
+    try {
+        await fetch("/order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(order)
+        });
+        // Clear the cart
+        cart = [];
+        localStorage.setItem("cart", JSON.stringify(cart));
+
+        // Display a message to explain what happened
+        message.textContent = "Order placed successfully!";
+
+    } catch (error) {
+        message.textContent = "Something went wrong! Please try again.";
+        message.classList.add("error");
+    }
+    message.classList.remove("hidden");
+    document.getElementById("place-order-btn").classList.add("hidden");
+```
+
+[ T6/scripts/reservations.js, lines 128-179 ]  form submit: FormData -> object -> JSON POST, status checks, HTML reply
+```
+document.querySelector("form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(this));
+    const msg = document.getElementById("reservation-message");
+    try {
+        const response = await fetch("http://localhost:3000", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error("Page Not Found");
+            } else if (response.status === 500) {
+                throw new Error("There is a Server Problem");
+            } else {
+                throw new Error("Request failed with status: ", response.status);
+            }
+        }
+
+        const html = await response.text();
+        document.body.innerHTML = html;
+        
+        /*const result = await response.json(); // This could throw an error
+        console.log(result);
+
+        // Clear the form and update the status of all fields
+        document.querySelector("form").reset();
+        updateState();
+
+        // Inform the user that the reservation was successful
+        msg.textContent = "Reservation successfully submitted!";
+        msg.style.color = "green";
+        msg.classList.remove("hidden"); */
+
+    } catch(error) {
+        if (error.name === "TypeError") {
+            console.error("Network error (no connection or server unreachable)");
+        } else {
+            console.error("Request error:", error.message);
+        }
+        // Inform the user that something went wrong
+        msg.textContent = "Something went wrong. Please try again.";
+        msg.style.color = "red";
+        msg.classList.remove("hidden");
+    }
+    
+    setTimeout(() => {
+        msg.classList.add("hidden");
+    }, 3000);
+});
+```
+  - e.preventDefault() stops the browser's normal form submit.
+  - Object.fromEntries(new FormData(this)) turns the form fields into {name: value, ...}.
+  - fetch only rejects on a NETWORK failure (TypeError). A 404/500 still resolves, so check response.ok / response.status.
+  - Server replies JSON -> response.json().  Server replies HTML -> response.text().
+
+
+6. COMMON STATUS CODES
+----------------------
+  200 OK                     success (GET page/JSON, POST handled)
+  201 Created                success, a new resource was created (often POST)
+  204 No Content             success, nothing to send back
+  301 / 302 Redirect         Location header says where to go
+  400 Bad Request            client sent bad data (e.g. invalid JSON)
+  401 / 403                  not logged in / not allowed
+  404 Not Found              file or route doesn't exist
+  500 Internal Server Error  server-side failure (fs error, template error, exception)
+
+Used in your server (see the T6/server.js lines 21-39 block above): 200, 404 and 500.
+The status is set with response.writeHead(status, headers) once, before response.end().
+
+
+7. <form> AND COMMON HTML TAGS
+------------------------------
+[ T6/reservations.html, lines 24-54 ]  the reservation form
+```
+        <form>
+            <div class="location-row">
+                <label for="location">Location:</label>
+                <select name="location" id="location" required>
+                    <option value="">-- Choose an Option --</option>
+                </select>
+            </div>
+            <label for="name">Name:</label>
+            <input type="text" name="name" id="name" required>
+
+            <label for="phone">Phone:</label>
+            <input type="tel" name="phone" id="phone" pattern="1? ?\([0-9]{3}\) ?[0-9]{3}-[0-9]{4}" 
+            placeholder="1 (xxx) xxx-xxxx" required>
+
+            <label for="date">Date:</label>
+            <input type="date" name="date" id="date" required>
+
+            <label for="time">Time (11AM - 10PM):</label>
+            <input type="time" name="time" id="time" required>
+
+            <label for="guests">Number of Guests:</label>
+            <input type="number" name="guests" id="guests" min="1" max="30" value="2" required>
+
+            <div id="checkbox-row">
+                <input type="checkbox" name="agreement" id="agreement" required>
+                <label for="agreement">I acknowledge and agree that reservations are held for 
+                    15 minutes past the scheduled time. Failure to arrive within this time may 
+                    result in cancellation of the reservation.</label>
+            </div>
+            <input type="submit" value="Book Reservation">
+        </form>        
+```
+  - <label for="x"> matches the input's id="x".
+  - `name` = the key used by FormData / the submitted data.  `id` = for JS, labels, CSS.
+  - No action/method here because JS handles the submit with fetch.
+    A plain form would use <form action="/order" method="POST"> (that sends url-encoded data, not JSON).
+  - Other tags in these pages: <header> <footer> <h1> <h2> <p> <a href> <img src alt> <div> <span>
+    <ul> <li> <table> <tr> <td> <hr> <br> <link rel="stylesheet" href> <script src>.
+
+
+
+
+Template Engines Tutorial 7
+==============================================
+
+Install:  npm install ejs pug   (T7/package.json already lists both)
+Views:    T7/views/*.ejs, *.pug  and  T7/views/partials/header|footer .ejs|.pug
+
+
+1. RENDERING TEMPLATES FROM THE SERVER
+--------------------------------------
+[ T7/server.js, lines 2-9 ]  require the template engine
+```
+let http = require("http");
+let fs = require("fs");
+let path = require("path");
+let pug = require("pug");
+const locations = require("./data/locations");
+const {categories, menuItems} = require("./data/menu");
+
+let PORT = 3000;
+```
+
+[ T7/server.js, lines 62-74 ]  renderPage: pug.renderFile(path, data, callback)
+```
+//Render an pug page
+function renderPage(templatePath, response, data = {}) {
+    pug.renderFile(templatePath, data, function(err,html) { 
+        if (err) {
+            console.error(err);
+            response.writeHead(500);
+            response.end(" Internal Server Error");
+        } else {
+            response.writeHead(200, { "Content-Type": "text/html" });
+            response.end(html);
+        }
+    });
+}
+```
+
+[ T7/server.js, lines 97-130 ]  routes that pass data into templates, static fallthrough for css/js/images
+```
+    // Handle a GET request for an HTML page 
+    if (request.method === "GET") {
+        if (url.pathname === "/menu") {
+            renderPage(path.join(__dirname, "views/menu.pug"), response,{ categories: categories,  menuItems: menuItems });
+            return;
+        }
+
+        if (url.pathname === "/locations") {
+            renderPage(path.join(__dirname, "views/locations.pug"), response,{ locations: locations });
+            return;
+        } 
+
+         if (url.pathname === "/reservations") {
+            renderPage(path.join(__dirname, "views/reservations.pug"), response,{ locations: locations });
+            return;
+        }
+        const routes = {
+            "/": "views/index.pug",
+            "/cart": "views/cart.pug",
+            "/contact": "views/contact.pug"
+        };
+        // Check if request is for a page and map it to the correct filename
+        let filePath = routes[url.pathname];
+
+        //if a route was found, it is an PUG templatre needs rendering
+        if (filePath) {
+            filePath = path.join(__dirname, filePath);
+            renderPage(filePath, response);
+        }
+        else { //otherwise this must be a non HTML resource
+            filePath = path.join(__dirname, url.pathname);
+            serveStaticFile(filePath, response);
+        }
+    }
+```
+  - The keys of the data object ({ categories: ..., menuItems: ... }) become variables inside the template.
+  - Pages needing no data are just renderPage(filePath, response).
+
+[ my own illustration - NOT from your files ]  EJS is the same call with a different module
+    let ejs = require("ejs");
+    ejs.renderFile(templatePath, data, function (err, html) { /* same body as renderPage */ });
+
+
+2. HTML  ->  EJS  ->  PUG
+-------------------------
+
+2a. Tags, attributes, ids, classes, text
+[ T6/index.html, lines 19-30 ]  HTML
+```
+        <h1>Welcome to The Laughing Ladle!</h1>
+        <img src="images/inside-restaurant.jpg" id="restaurant-img" alt="The Laughing Ladle interior">
+
+        <p>Delicious meals, good vibes, and laughter at every table.</p>
+        <p>Come join us for a great dining experience with friends and family!</p>
+        <p><a href="/reservations" id="book-reservation-link">Make a Reservation</a></p>
+
+        <div class="promo">
+            <img src="images/appetizers.jpg" alt="Delicious appetizers"> 
+            <div class="promo-text">
+                <h2>Weekend Happy Hour!</h2>
+                <p id=good-deal>Get 20% off all appetizers every Friday and Saturday from 4 PM – 7 PM!</p>
+```
+
+[ T7/views/index.ejs, lines 2-15 ]  EJS (plain HTML in the body; header/footer come from includes)
+```
+        <h1>Welcome to The Laughing Ladle!</h1>
+        <img src="images/inside-restaurant.jpg" id="restaurant-img" alt="The Laughing Ladle interior">
+
+        <p>Delicious meals, good vibes, and laughter at every table.</p>
+        <p>Come join us for a great dining experience with friends and family!</p>
+        <p><a href="/reservations" id="book-reservation-link">Make a Reservation</a></p>
+
+        <div class="promo">
+            <img src="images/appetizers.jpg" alt="Delicious appetizers"> 
+            <div class="promo-text">
+                <h2>Weekend Happy Hour!</h2>
+                <p id=good-deal>Get 20% off all appetizers every Friday and Saturday from 4 PM – 7 PM!</p>
+            </div>
+        </div>
+```
+
+[ T7/views/index.pug, lines 5-17 ]  PUG (indentation = nesting, no closing tags)
+```
+h1 Welcome to The Laughing Ladle!
+img#restaurant-img(src="images/inside-restaurant.jpg", alt="The Laughing Ladle interior")
+
+p Delicious meals, good vibes, and laughter at every table.
+p Come join us for a great dining experience with friends and family!
+p 
+    a(href="/reservations", id="book-reservation-link") Make a Reservation
+
+div.promo
+    img(src="images/appetizers.jpg", alt="Delicious appetizers")
+    div.promo-text
+        h2 Weekend Happy Hour!
+        p#good-deal Get 20% off all appetizers every Friday and Saturday from 4 PM – 7 PM!
+```
+
+Pug cheat sheet (my own summary, from the files above)
+  h1 text                       tag with text
+  img#restaurant-img(src=..)    "#id" and ".class" shorthand, attributes in parentheses separated by commas
+  div.promo                     a div with class promo
+  p.hidden(id="x") text         class + attribute
+  // comment                    rendered as an HTML comment      //- comment  is NOT rendered
+  | text                        a line of plain text
+  script.                       the indented lines below are raw text (used for JavaScript)
+  Child elements are indented under their parent; use consistent spaces.
+
+2b. Output a variable / expression
+[ T7/views/menu.ejs, lines 18-23 ]  EJS: <%= %> is escaped output
+```
+                        <img src="<%= item.image %>" alt="menu item <%= item.name %>">
+                        <div>
+                            <span class="name"><%= item.name %></span>
+                            <span class="price">$<%= item.price %></span>
+                            <p><%= item.description %></p>
+                            <a class="order-button add-to-cart" data-item="<%= JSON.stringify(item) %>">Add to Cart</a>
+```
+
+[ T7/views/menu.pug, lines 20-28 ]  PUG: "= expr" outputs escaped text, attribute values are plain JS expressions
+```
+                    img(src= item.image, alt="menu item " + item.name)
+                    div
+                        span.name 
+                            = item.name
+                        span.price $
+                            = item.price
+                        p 
+                            = item.description
+                        a.order-button.add-to-cart(data-item=JSON.stringify(item)) Add to Cart
+```
+  EJS  <%= x %> escaped      <%- x %> raw (unescaped)      <%# comment %>
+  PUG  = x  escaped          != x  raw      #{x} escaped interpolation      !{x} raw interpolation
+
+2c. Embedded JavaScript: loops, conditionals, variables
+[ T7/views/menu.ejs, lines 7-29 ]  EJS: JS goes in <% %>, braces are opened and closed in separate tags
+```
+    <% for (let catName of categories) { %>
+        <div class="menu-category <%= catName === 'Drinks' ? 'drink' : '' %>">
+            <h2>
+                <span class="arrow">▸</span> <%= catName %>
+            </h2>
+
+            <ul class ="hidden">
+                <!-- Loop through all menu items that belong to this category -->
+                <% let catItems = menuItems.filter(item => item.category === catName); %>
+                <% for (let item of catItems) { %>
+                    <li>
+                        <img src="<%= item.image %>" alt="menu item <%= item.name %>">
+                        <div>
+                            <span class="name"><%= item.name %></span>
+                            <span class="price">$<%= item.price %></span>
+                            <p><%= item.description %></p>
+                            <a class="order-button add-to-cart" data-item="<%= JSON.stringify(item) %>">Add to Cart</a>
+                        </div>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    <% } %>
+```
+
+[ T7/views/menu.pug, lines 10-28 ]  PUG: a line starting with "-" is JS, indentation replaces braces
+```
+- for (let catName of categories)
+    div.menu-category(class= catName === 'Drinks' ? 'drink' : '')
+        h2
+            span.arrow ▸ 
+                = catName
+        ul.hidden
+            // Loop through all menu items that belong to this category
+            - let catItems = menuItems.filter(item => item.category === catName)
+            - for (let item of catItems)
+                li
+                    img(src= item.image, alt="menu item " + item.name)
+                    div
+                        span.name 
+                            = item.name
+                        span.price $
+                            = item.price
+                        p 
+                            = item.description
+                        a.order-button.add-to-cart(data-item=JSON.stringify(item)) Add to Cart
+```
+
+[ T7/views/partials/header.ejs, lines 22-24 ]  EJS if
+```
+            <% if (typeof showCartButton !== 'undefined') { %>
+                <a href="/cart" id="view-cart" class="order-button cart-button">View Cart (0)</a>
+            <% } %>
+```
+
+[ T7/views/partials/header.pug, lines 19-21 ]  PUG if (no "-" needed for if/else)
+```
+            if typeof showCartButton !== "undefined" 
+                a.order-button.cart-button#view-cart(href="/cart")
+                    View Cart (0)
+```
+  - Pug also has its own loop (my note, not in your files):  each item in menuItems
+  - `typeof x !== 'undefined'` is the safe test for an OPTIONAL variable.
+
+2d. Nested loops: locations table, 3 per row
+[ T6/locations.html, line 23 ]  HTML (the table was filled in by client JS)
+```
+        <table id="locationsTable"></table>
+```
+
+[ T7/views/locations.ejs, lines 5-24 ]  EJS
+```
+        <table id="locationsTable">
+                <% for (let rowStart=0; rowStart<locations.length; rowStart+=3) { %>
+                <tr>
+                        <% for (let i=rowStart; i<rowStart+3; i++) { %>
+                        <% const loc = locations[i]; %>
+                        <td>
+                                <h2>
+                                <%= loc.name1 %> <br>
+                                <%= loc.name2 %>
+                                </h2>
+                                <p id="details<%=i%>">
+                                <%= loc.street %> <br>
+                                <%= loc.cityProv %> <br>
+                                Phone: <%= loc.phone %>
+                                </p>
+                        </td>
+                        <% } %>
+                </tr>
+                <% } %>
+        </table>
+```
+
+[ T7/views/locations.pug, lines 7-22 ]  PUG
+```
+table(id="locationsTable")
+    - for (let rowStart=0; rowStart<locations.length; rowStart+=3)
+        tr
+            - for (let i=rowStart; i<rowStart+3 && i<locations.length; i++)
+                - const loc = locations[i]
+                td
+                    h2
+                        = loc.name1 
+                        br
+                        = loc.name2
+                    p(id="details"+i)
+                        = loc.street  
+                        br
+                        = loc.cityProv  
+                        br
+                        = "Phone: " + loc.phone
+```
+
+2e. A <select> filled from server data
+[ T6/reservations.html, lines 27-29 ]  HTML
+```
+                <select name="location" id="location" required>
+                    <option value="">-- Choose an Option --</option>
+                </select>
+```
+
+[ T7/views/reservations.ejs, lines 11-20 ]  EJS
+```
+                <select name="location" id="location" required>
+                    <option value="">-- Choose an Option --</option>
+                    // Populate the Select box with the location options
+                    <% for (let i=0; i<locations.length; i++) { %>
+                        <% const loc = locations[i]; %>
+                        <option value="<%=loc.name1%> – <%=loc.name2%>">
+                            <%=loc.name1%> – <%=loc.name2%>
+                        </option>
+                    <% } %>
+                </select>
+```
+
+[ T7/views/reservations.pug, lines 13-21 ]  PUG
+```
+        select(name="location", id="location", required)
+            option(value="") -- Choose an Option --
+            // Populate the Select box with the location options
+            - for (let i=0; i<locations.length; i++)
+                - const loc = locations[i];
+                option(value="=loc.name1 – =loc.name2")
+                    =loc.name1 
+                    – 
+                    =loc.name2
+```
+  (see "Issues" at the bottom: both of these have a small bug)
+
+2f. Passing server data to the browser's JavaScript (unescaped JSON in a <script>)
+[ T7/views/locations.ejs, lines 25-27 ]  EJS: <%- ... %> so quotes are not turned into &quot;
+```
+        <script>
+                const locations = <%- JSON.stringify(locations); %>
+        </script>
+```
+
+[ T7/views/locations.pug, lines 23-24 ]  PUG: "script." block + !{ } (unescaped interpolation)
+```
+script.
+    const locations = !{JSON.stringify(locations)}
+```
+
+2g. Data in an attribute
+[ T7/views/menu.ejs, line 23 ]  EJS
+```
+                            <a class="order-button add-to-cart" data-item="<%= JSON.stringify(item) %>">Add to Cart</a>
+```
+
+[ T7/views/menu.pug, line 28 ]  PUG
+```
+                        a.order-button.add-to-cart(data-item=JSON.stringify(item)) Add to Cart
+```
+
+
+3. PARTIALS / INCLUDES (reusing the header and footer)
+------------------------------------------------------
+Page sets values, then includes the partial. The partial reads them (title, style, showCartButton, script).
+
+[ T7/views/menu.ejs, line 1 and line 30 ]  EJS: include with data object, <%- so the HTML is not escaped
+```
+<%- include("partials/header", { title: "The Laughing Ladle – Locations", style: "styles/menu.css", showCartButton: 1 }) %>
+```
+```
+<%- include("partials/footer", { script: "scripts/menu-page.js" }) %>
+```
+
+[ T7/views/menu.pug, lines 1-4 ]  PUG: declare variables first, then include
+```
+- var title = "The Laughing Ladle – Menu"
+- var style = "styles/menu.css"
+- var showCartButton = 1
+include partials/header
+```
+
+[ T7/views/menu.pug, lines 30-31 ]  PUG: footer include
+```
+- var script = "scripts/menu-page.js"
+include partials/footer
+```
+
+[ T7/views/partials/header.ejs, lines 1-25 ]  EJS header partial
+```
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title><%= title %></title>
+        <link rel="stylesheet" href="styles/style.css">
+        <% if (typeof style !== 'undefined') { %>
+            <link rel="stylesheet" href="<%= style %>">
+        <% } %>
+    </head>
+    <body>
+        <!-- Header -->
+        <header>
+            <!-- Navigation Links -->
+            <img src="images/banner.jpg" alt="restaurant name banner">
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/menu">Menu</a>
+                <a href="/locations">Locations</a>
+                <a href="/reservations">Reservations</a>
+            </div>
+            <% if (typeof showCartButton !== 'undefined') { %>
+                <a href="/cart" id="view-cart" class="order-button cart-button">View Cart (0)</a>
+            <% } %>
+        </header>
+```
+
+[ T7/views/partials/header.pug, lines 1-21 ]  PUG header partial
+```
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        title= title
+        link(rel="stylesheet", href="styles/style.css")
+        if typeof style !== "undefined"
+            link(rel="stylesheet", href=style)
+    body
+        // Header
+        header
+            // Navigation Links
+            img(src="images/banner.jpg", alt="restaurant name banner")
+            div.nav-links
+                a(href="/") Home
+                a(href="/menu") Menu
+                a(href="/locations") Locations
+                a(href="/reservations") Reservations
+            if typeof showCartButton !== "undefined" 
+                a.order-button.cart-button#view-cart(href="/cart")
+                    View Cart (0)
+```
+
+[ T7/views/partials/footer.ejs, lines 1-14 ]  EJS footer partial
+```
+ <!-- Footer -->
+        <footer>
+            <hr>
+            <p>&copy; 2026 The Laughing Ladle</p>
+            <a href="/contact">Contact Us</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+        </footer>
+ 
+        <% if (typeof script !== 'undefined') { %>
+            <script src="<%= script %>"></script>
+        <% } %> 
+    </body>
+</html>
+```
+
+[ T7/views/partials/footer.pug, lines 1-10 ]  PUG footer partial
+```
+// Footer
+footer 
+    hr
+    p &copy; 2026 The Laughing Ladle
+    a(href="/contact") Contact Us
+    a(href="#") Privacy Policy
+    a(href="#") Terms of Service 
+
+    if typeof script !== "undefined"
+        script(src=script)       
+```
+
+
+4. CONVERSION CHECKLIST
+-----------------------
+  1. Replace the hard-coded title/stylesheet with variables; move repeated header/footer into partials.
+  2. Anything client JS built with createElement (select options, table rows, menu lists)
+     becomes a loop in the template using data passed from the server.
+  3. If the browser script still needs the data, emit it with <%- JSON.stringify(x) %> / !{JSON.stringify(x)}.
+  4. In server.js, pages go through renderPage(path, response, {data}); css/js/images stay on serveStaticFile.
+
+
+5. ISSUES I FOUND IN YOUR OWN FILES (code above is shown unchanged, so these bugs are visible in it)
+-----------------------------------------------------------------------------------------------
+  - T6/server.js and T7/server.js: a POST to an unknown path never calls response.end(), so the request hangs.
+    Also JSON.parse(body) throws on invalid JSON and would crash the server.
+  - T7/views/reservations.pug line 18: option(value="=loc.name1 – =loc.name2") is a literal string
+    ("=" is not evaluated inside quotes). It should be a JS expression, e.g. value=loc.name1 + " – " + loc.name2.
+  - T7/views/reservations.ejs line 13: "// Populate the Select box..." is plain HTML text, not a comment
+    (use <%# ... %> or <!-- ... -->).
+  - T7/views/locations.ejs line 8: the inner loop has no `&& i<locations.length` (the pug version, line 10, does),
+    so a location count that isn't a multiple of 3 gives an undefined `loc` and an error.
+  - T7/views/menu.ejs line 1: the title says "Locations" instead of "Menu".

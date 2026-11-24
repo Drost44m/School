@@ -1,0 +1,23 @@
+doctype html
+<html lang="en">
+head
+  meta(charset="UTF-8")
+  title= title
+  link(rel="stylesheet" href="/css/styles.css")
+  link(rel="stylesheet" href="/css/" + css)
+<body>
+nav.main-nav
+  ul
+    li
+      a(href="/" class=(active === "home" ? "active" : undefined)) Home
+    li
+      a(href="/browse" class=(active === "browse" ? "active" : undefined)) Browse Pets
+    li
+      a(href="/admin/applications" class=(active === "applications" ? "active" : undefined)) Applications
+    li
+      a(href="/admin/shelters" class=(active === "shelters" ? "active" : undefined)) Shelters
+    li
+      a(href="/about" class=(active === "about" ? "active" : undefined)) About Us
+
+header.banner
+  img.banner-img(src="/images/banner.jpg" alt="New Home Animal Rescue Banner")

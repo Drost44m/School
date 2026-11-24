@@ -1,0 +1,58 @@
+include header
+
+section.form-section
+  form#adoptionForm
+    #petApplicationInfo.pet-info
+      if pet
+        h2 Applying to Adopt: #{pet.name}
+        p Type: #{pet.type} | Breed: #{pet.breed}
+        p Adoption Fee: $#{pet.adoptionFee} + Processing Fee: $#{processingFee} = Total (before taxes): $#{totalFee}
+      else
+        p.error Incomplete Pet .
+
+    h2 Your Information
+    input#name(type="text" placeholder="Full Name")
+    input#email(type="email" placeholder="Email Address")
+    input#phone(type="tel" placeholder="Phone Number")
+    input#address(type="text" placeholder="Home Address")
+    input#residents(type="number" placeholder="Number of Residents in Home" min="1")
+
+    h2 Current Pets in Your Home
+    textarea#currentPets(placeholder="List other pets you currently have (species, age, health)" rows="3")
+
+    h2 Pet Experience
+    label Do you have experience with this type of pet?
+    select#experience
+      option(value="") -- Select --
+      option(value="None") None
+      option(value="Some") Some
+      option(value="Extensive") Extensive
+
+    label Where will this pet primarily live?
+    select#location
+      option(value="") -- Select --
+      option(value="Indoor") Indoor
+      option(value="Outdoor") Outdoor
+      option(value="Both") Both
+
+    h2 Support Us
+    label Optional Donation
+    select#donation
+      option(value="0") $0
+      option(value="10") $10
+      option(value="25") $25
+      option(value="50") $50
+
+    h2 Agreements
+    label
+      input#agreement1(type="checkbox" required)
+      |  I agree to provide proper care, food, shelter, and medical attention.
+    label
+      input#agreement2(type="checkbox" required)
+      |  I understand that this application does not guarantee adoption.
+
+    button#submitBtn(type="submit" disabled) Submit Application
+
+script(src="/js/apply.js")
+
+include footer

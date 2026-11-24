@@ -1,0 +1,41 @@
+body {
+    color: #3E1D0A;
+}
+.specials-container {
+    width: 90%;
+    margin: 30px auto;
+}
+.special-card {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 40px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid rgba(128, 82, 49, 0.35);
+}
+.special-card img {
+    width: 220px;
+    height: 160px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+.special-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.special-info h2 {
+    margin-bottom: 8px;
+    border-bottom: 2px solid #805231;
+    padding-bottom: 5px;
+}
+.price {
+    font-size: 16pt;
+    font-style: italic;
+    font-weight: bold;
+    color: #805231;
+    margin-bottom: 10px;
+}
+.special-info p {
+    max-width: 700px;
+    line-height: 1.5;
+}

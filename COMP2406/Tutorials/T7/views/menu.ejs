@@ -1,0 +1,30 @@
+<%- include("partials/header", { title: "The Laughing Ladle – Locations", style: "styles/menu.css", showCartButton: 1 }) %>
+ 
+    <h1>Menu</h1>
+    <p> (Select category to view menu items)</p>
+    <!-- The Categories and their Menu Items will be inserted here from JS code -->
+ 
+    <% for (let catName of categories) { %>
+        <div class="menu-category <%= catName === 'Drinks' ? 'drink' : '' %>">
+            <h2>
+                <span class="arrow">▸</span> <%= catName %>
+            </h2>
+
+            <ul class ="hidden">
+                <!-- Loop through all menu items that belong to this category -->
+                <% let catItems = menuItems.filter(item => item.category === catName); %>
+                <% for (let item of catItems) { %>
+                    <li>
+                        <img src="<%= item.image %>" alt="menu item <%= item.name %>">
+                        <div>
+                            <span class="name"><%= item.name %></span>
+                            <span class="price">$<%= item.price %></span>
+                            <p><%= item.description %></p>
+                            <a class="order-button add-to-cart" data-item="<%= JSON.stringify(item) %>">Add to Cart</a>
+                        </div>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    <% } %>
+<%- include("partials/footer", { script: "scripts/menu-page.js" }) %>

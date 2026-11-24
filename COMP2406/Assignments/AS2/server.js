@@ -72,7 +72,6 @@ function handleRequest(req, res) {
     // Handle all incoming GET requests
     if (req.method === 'GET') {
         // For now ... just server all static files and replace '/' with 'index.html'
-        // Shelter data: summaries of all shelters, or one full shelter by ?id=
         if (pathname === '/shelters') {
             if (parsed.query.id !== undefined) {
                 const shelter = shelters.find(sh => sh.id === parsed.query.id);
@@ -88,7 +87,7 @@ function handleRequest(req, res) {
             return res.end(JSON.stringify(summaries));
         }
 
-        // A single pet, found by ?petId= within the shelter given by ?shelterId=
+        // A single pet, pet id given from shelter id
         if (pathname === '/shelters/pets') {
             const shelter = shelters.find(sh => sh.id === parsed.query.shelterId);
             const pet = shelter && shelter.pets.find(p => p.id === parsed.query.petId);
@@ -100,7 +99,7 @@ function handleRequest(req, res) {
             return res.end(JSON.stringify(pet));
         }
 
-        // Summary of every submitted application
+        // submitted applications
         if (pathname === '/applications-data') {
             const summaries = applications.map(a => {
                 const shelter = shelters.find(sh => sh.id === a.shelterId);
@@ -118,7 +117,7 @@ function handleRequest(req, res) {
             return res.end(JSON.stringify(summaries));
         }
 
-        // Full details of one application, by ?id=
+        // application by id
         if (pathname === '/applications-details') {
             const application = applications.find(a => a.applicationId === parsed.query.id);
             if (!application) {
@@ -143,7 +142,7 @@ function handleRequest(req, res) {
         return serveStatic(filePath, res);
     }
 
-    // Receive a submitted adoption application
+    // recieve application
     if (req.method === 'POST' && pathname === '/submit-application') {
         let body = '';
         req.on('data', chunk => { body += chunk; });
@@ -176,7 +175,7 @@ function handleRequest(req, res) {
         return;
     }
 
-    // Update the status of an application
+    // changing status
     if (req.method === 'PUT' && pathname === '/applications-update') {
         let body = '';
         req.on('data', chunk => { body += chunk; });
@@ -206,12 +205,12 @@ function handleRequest(req, res) {
         return;
     }
 
-    // Handle anything else as an error
+    // error handle
     return res.writeHead(404).end('Not Found');
 }
 
 
-// Start server only once all shelters have been loaded
+//start
 loadShelters((err, data) => {
     if (err) {
         console.error('Failed to load shelters:', err);
