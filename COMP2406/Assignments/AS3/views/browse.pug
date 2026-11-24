@@ -5,21 +5,18 @@ section.shelter-select
   select#shelterDropdown
     option(value="") -- No Shelter Selected --
     each s in shelters
-      option(value=s.id selected=(s.id === shelterId))= s.name
+      option(value=s.id)= s.name
 
-//- Pet type buttons (only shown once a shelter is selected)
-if shelterId
-  section#petTypeBar.pet-type-bar
-    each t in types
-      - const cls = (t.type === activeType ? "active" : "") + (t.count === 0 ? " disabled" : "")
-      button(class=cls data-href="/browse?shelterId=" + shelterId + "&type=" + t.type)= t.label
+//- Pet Type Buttons = hidden by default
+section#petTypeBar.pet-type-bar.hidden
+  button(data-type="All") All
+  button(data-type="Cat") Cats
+  button(data-type="Dog") Dogs
+  button(data-type="Bird") Birds
+  button(data-type="Reptile") Reptiles
+  button(data-type="Other") Other
 
 section#petContainer.pet-grid
-  each p in pets
-    .pet-card
-      img(src="/" + p.image alt=p.name)
-      h3= p.name
-      button(data-href="/details?petId=" + p.id + "&shelterId=" + shelterId) View Details
 
 script(src="/js/browse.js")
 

@@ -1,0 +1,21 @@
+include header
+
+main.shelters-main
+  h1 Shelters
+  .shelters-card
+    ul#shelterList
+      each s in shelters
+        li
+          a(href="/admin/shelters/" + s.id)= s.name
+          img.remove-icon(src="/images/remove.svg" alt="Remove " + s.name data-id=s.id data-name=s.name)
+
+    h2 Add a Shelter
+    .add-shelter
+      input#shelterName(type="text" placeholder="Shelter Name")
+      input#shelterCity(type="text" placeholder="City")
+      input#shelterFee(type="text" placeholder="Processing Fee")
+      button#addShelterBtn Add Shelter
+
+script(src="/js/shelters.js")
+
+include footer

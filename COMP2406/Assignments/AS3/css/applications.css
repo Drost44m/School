@@ -174,3 +174,6 @@
     font-weight: bold;
     border: 1px solid #A9724B;
 }
+.hidden {
+    display: none;
+}

@@ -1,8 +1,8 @@
 include header
 
 section#petDetailsContainer
-  if !pet
-    p.error Pet not found.
+  if error
+    p.error= error
   else
     .pet-detail-card
       img.pet-detail-image(src="/" + pet.image alt=pet.name)
@@ -20,6 +20,9 @@ section#petDetailsContainer
       p
         strong Days at Shelter:
         |  #{pet.daysAtShelter}
+      p
+        strong Views:
+        |  #{pet.views}
       hr
       p
         strong Adoption Fee:
@@ -30,9 +33,12 @@ section#petDetailsContainer
       p
         strong Total (before taxes):
         |  $#{totalFee}
-      a.apply-button(href="/apply?petId=" + pet.id + "&shelterId=" + shelterId) Apply to Adopt this Pet
-a#back-button
-  if shelterId
+      a.apply-button(href="/apply?petId=" + pet.id + "&petName=" + encodeURIComponent(pet.name) + "&petType=" + encodeURIComponent(pet.type) + "&petBreed=" + encodeURIComponent(pet.breed) + "&adoptionFee=" + pet.adoptionFee + "&processingFee=" + processingFee + "&shelterId=" + shelterId) Apply to Adopt this Pet
+if shelterId
+  a#back-button
     a.back-link(href="/browse?shelterId=" + shelterId) Back to Browsing
+else
+  a#back-button
+    a.back-link(href="/browse") Back to Browsing
 
 include footer

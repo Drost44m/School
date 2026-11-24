@@ -1,0 +1,90 @@
+include header
+
+main.shelter-info-main(data-shelter-id=shelter.id)
+  h1 Shelter Information
+
+  section#shelterSection.info-card
+    h2 Shelter Information
+    .field-row
+      label(for="shelterId") ID
+      input#shelterId(type="text" value=shelter.id)
+    .field-row
+      label(for="shelterName") Name
+      input#shelterName(type="text" value=shelter.name)
+    .field-row
+      label(for="shelterCity") City
+      input#shelterCity(type="text" value=shelter.city)
+    .field-row
+      label(for="shelterFee") Processing Fee
+      input#shelterFee(type="text" value=shelter.processingFee)
+    button#saveShelterBtn Save Changes
+
+  section#petListSection.info-card
+    h2 List of Pets
+    .pet-table-wrapper
+      table.pet-table
+        thead
+          tr
+            th ID
+            th Name
+            th Type
+            th Adoption Fee
+            th Days at Shelter
+            th
+        tbody#petTableBody
+          each p in shelter.pets
+            tr(data-id=p.id data-name=p.name data-type=p.type data-breed=p.breed data-age=p.age data-fee=p.adoptionFee data-health=p.health data-traits=p.traits.join(", ") data-image=p.image)
+              td= p.id
+              td= p.name
+              td= p.type
+              td $#{p.adoptionFee}
+              td= p.daysAtShelter
+              td
+                img.remove-icon(src="/images/remove.svg" alt="Remove " + p.name)
+    button#newPetBtn New Pet
+
+  section#petDetailsSection.info-card.hidden
+    h2 Pet Details
+    .details-grid
+      .details-fields
+        .field-row
+          label(for="petId") ID
+          input#petId(type="text" readonly)
+        .field-row
+          label(for="petType") Type
+          select#petType
+            option(value="Cat") Cat
+            option(value="Dog") Dog
+            option(value="Bird") Bird
+            option(value="Reptile") Reptile
+            option(value="Other") Other
+        .field-row
+          label(for="petName") Name
+          input#petName(type="text")
+        .field-row
+          label(for="petBreed") Breed
+          input#petBreed(type="text")
+        .field-row
+          label(for="petAge") Age
+          input#petAge(type="number" min="0")
+        .field-row
+          label(for="petFee") Adoption Fee
+          input#petFee(type="number" min="0")
+        .field-row
+          label(for="petHealth") Health
+          textarea#petHealth(rows="3")
+        .field-row
+          label(for="petTraits") Traits
+          input#petTraits(type="text" placeholder="Friendly, Energetic, Good with kids")
+      .details-image
+        img#petImage(src="/images/unknownPet.jpg" alt="Pet image")
+        input#petImageName(type="text" readonly)
+        input#imageFile(type="file" accept="image/*" hidden)
+        button#chooseImageBtn Choose New Image
+    .button-row
+      button#savePetBtn Save Changes
+      button#cancelPetBtn Cancel
+
+script(src="/js/shelterInfo.js")
+
+include footer

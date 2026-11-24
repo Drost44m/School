@@ -1,285 +1,456 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const url = require('url');
-const pug = require('pug');
+const express = require("express");
+const app = express();
+let path = require("path");
+let fs = require("fs");
+const multer = require("multer");
+app.set("view engine", "pug");                   // Set up PUG as the view engine
+app.set("views", path.join(__dirname, "views")); // Tell Express where the views are
 
-// Data for the About page
-const aboutData = require('./data/aboutData.json');
+const aboutData = require("./data/aboutData.json");
 
-// Submitted applications
-let applications = []; // None so far
+let PORT = 3000;
 
-// Load the shelter data upon startup
+// The directory that holds the shelter data (each shelter is in its own JSON file)
+const sheltersDir = path.join(__dirname, "data/shelters");
+
+// Add every .json file found in that directory to the shelters array
 let shelters = [];
-
-// Get all the files in the shelters directory (assumed to be JSON)
-const files = fs.readdirSync(path.join(__dirname, 'data/shelters'));
-
-// Read each .json file and extract/add the JSON data to the shelters array
+let shelterFiles = {}; // Remembers which file each shelter is saved in (shelter id -> file name)
+const files = fs.readdirSync(sheltersDir);
 for (let i=0; i<files.length; i++) {
-    if (files[i].endsWith('.json')) {
-        const data = fs.readFileSync(path.join(__dirname, 'data/shelters', files[i]), 'utf-8');
-        shelters.push(JSON.parse(data));
+    if (files[i].endsWith(".json")) {
+        const shelter = require(path.join(sheltersDir, files[i]));
+        shelters.push(shelter);
+        shelterFiles[shelter.id] = files[i];
     }
 }
 
-// Return the Content-type based on the file type. This is needed for static file serving.
-function getMimeType(file) {
-    const ext = path.extname(file).toLowerCase();
-    switch(ext) {
-        case '.js': return 'application/javascript';
-        case '.css': return 'text/css';
-        case '.jpg': return 'image/jpeg';
-        case '.png': return 'image/png';
-        case '.svg': return 'image/svg+xml';
-        case '.json': return 'application/json';
-        case '.html': return 'text/html';
-        default: return 'text/plain';
+// The file that holds the next unique shelter and pet IDs
+const nextIDsFile = path.join(__dirname, "data/nextIDs.json");
+
+//  all submitted applications.
+// Each application will be assigned a unique ID starting at 1 (e.g., "a1").
+const applications = [];
+
+
+// Save a shelter (including its pets) to its JSON file
+function saveShelter(shelter) {
+    fs.writeFileSync(path.join(sheltersDir, shelterFiles[shelter.id]), JSON.stringify(shelter, null, 2));
+}
+
+// Setup for receiving pet image files: they are saved in the images folder with
+// the date/time added to the name so that it is unique, and only images are accepted
+const storage = multer.diskStorage({
+    destination: (request, file, callback) => callback(null, path.join(__dirname, "images")),
+    filename: (request, file, callback) => {
+        const safeName = path.basename(file.originalname).replace(/[^a-zA-Z0-9._-]/g, "_");
+        callback(null, Date.now() + "-" + safeName);
     }
-}
+});
+const fileFilter = (request, file, callback) => {
+    if (file.mimetype.startsWith("image/"))
+        callback(null, true);
+    else {
+        request.badImage = true; // The route will report this
+        callback(null, false);
+    }
+};
+const upload = multer({ storage, fileFilter });
 
-// This function serves all the static files 
-function serveStatic(filePath, res) {
-    fs.readFile(filePath, (err, data) => {
-        if (err) {
-            res.writeHead(404, {'Content-Type': 'text/plain'});
-            res.end('File not found');
-        } else {
-            res.writeHead(200, {'Content-Type': getMimeType(filePath)});
-            res.end(data);
-        }
-    });
-}
+const petTypes = ["Cat", "Dog", "Bird", "Reptile", "Other"];
 
-// Helper function to read a request body
-function readRequestBody(req, callback) {
-	let body = ""
-	req.on('data', (chunk) => {
-		body += chunk;
-	})
-	// Once the entire body is ready, process the request
-	req.on('end', () => {
-		callback(body);
-	});
+// Check the pet fields sent in a request body. Returns an error message, or
+// undefined if all is ok. If ok, the pet fields are put into the given pet object.
+function readPetFields(body, pet) {
+    const name = String(body.name || "").trim();
+    const breed = String(body.breed || "").trim();
+    const health = String(body.health || "").trim();
+    const traits = String(body.traits || "").trim();
+    const age = String(body.age || "").trim();
+    const fee = String(body.adoptionFee || "").trim();
+
+    if (!name || !breed || !health || !traits || !age || !fee)
+        return "The name, breed, age, adoption fee, health and traits must not be blank.";
+    if (!petTypes.includes(body.type))
+        return "The pet type is not valid.";
+    if (isNaN(Number(age)) || Number(age) < 0)
+        return "The age must be a number that is 0 or more.";
+    if (isNaN(Number(fee)) || Number(fee) < 0)
+        return "The adoption fee must be a number that is 0 or more.";
+
+    pet.name = name;
+    pet.type = body.type;
+    pet.breed = breed;
+    pet.age = Number(age);
+    pet.adoptionFee = Number(fee);
+    pet.health = health;
+    pet.traits = traits.split(",").map(t => t.trim()).filter(t => t !== "");
+    return undefined;
 }
 
 // Find and return the pet with the given Id from the given shelter Id
 function findPet(shelterId, petId) {
-    const shelter = shelters.find(shelter => (shelter.id === shelterId));
+    const shelter = shelters.find(shelter => shelter.id === shelterId);
     if (shelter)
-        return shelter.pets.find(pet => (pet.id === petId));
+        return shelter.pets.find(pet => pet.id === petId);
     else
         return undefined;
 }
 
-// Render a PUG page from the views folder and send it
-function renderPage(res, view, data) {
-    try {
-        const html = pug.renderFile(path.join(__dirname, 'views', view + '.pug'), data);
-        res.writeHead(200, {'Content-Type': 'text/html'});
-        res.end(html);
-    } catch(e) {
-        console.error(e);
-        res.writeHead(500, {'Content-Type': 'text/plain'});
-        res.end('Error rendering page');
-    }
-}
 
-// Handle all incoming endpoint requests
-function handleRequest(req, res) {
-    const parsed = url.parse(req.url, true); // true parses query string
-    const pathname = parsed.pathname;
-    let query = parsed.query;
+// Parse incoming JSON request bodies
+app.use(express.json());
 
-    // Handle all incoming GET requests
-    if (req.method === 'GET') {
-        //console.log(">>> Method: " + req.method);
-        //console.log(">>> Pathname: " + pathname);
+// Parse incoming URL-encoded form submissions
+app.use(express.urlencoded({ extended: true }));
 
-        // Handle requests for the home page
-        if ((pathname === '/') || (pathname === '/home') || (pathname === '/index.html'))
-            return renderPage(res, 'index', {title: 'New Home Animal Rescue', css: 'landing.css', active: 'home'});
+//Serve Static files
+app.use(express.static(__dirname));
 
-        // Handle requests for the Browse Pets page
-        if (pathname === '/browse') {
-            const shelterId = query.shelterId;
-            const shelter = shelters.find(s => (s.id === shelterId));
-            const pets = [];
-            const types = [{type: 'All', label: 'All', count: 0},
-                           {type: 'Cat', label: 'Cats', count: 0},
-                           {type: 'Dog', label: 'Dogs', count: 0},
-                           {type: 'Bird', label: 'Birds', count: 0},
-                           {type: 'Reptile', label: 'Reptiles', count: 0},
-                           {type: 'Other', label: 'Other', count: 0}];
-            let activeType = 'All';
-            if (shelter) {
-                // Only use the type if it is one of the buttons
-                if (types.find(t => (t.type === query.type)))
-                    activeType = query.type;
-                for (let i=0; i<shelter.pets.length; i++) {
-                    const pet = shelter.pets[i];
-                    types[0].count++;
-                    const typeEntry = types.find(t => (t.type === pet.type));
-                    if (typeEntry)
-                        typeEntry.count++;
-                    if ((activeType === 'All') || (activeType === pet.type))
-                        pets.push(pet);
-                }
-            }
-            return renderPage(res, 'browse', {title: 'New Home - Browse', css: 'browse.css', active: 'browse',
-                shelters: shelters, shelterId: shelter ? shelter.id : undefined, pets: pets, types: types, activeType: activeType});
-        }
 
-        // Handle requests for the About Us page
-        if (pathname === '/about') 
-            return renderPage(res, 'about', {title: 'New Home - About', css: 'about.css', active: 'about', about: aboutData});
-        
-        // Handle requests for the applications page
-        if (pathname === '/admin/applications') {
-            const appData = [];
-            for (let i=0; i<applications.length; i++) {
-                const app = applications[i];
-                const pet = findPet(app.shelterId, app.petId);
-                appData.push({date: app.date, applicationId: app.applicationId, shelterId: app.shelterId,
-                              petId: app.petId, petType: pet ? pet.type : '', status: app.status});
-            }
-            return renderPage(res, 'applications', {title: 'Applications - New Home Animal Rescue', css: 'applications.css',
-                active: 'applications', applications: appData});
-        }
+// Handle the GET / route to the main landing page
+app.get("/", (request, response) => {
+    response.render("index", { title: "New Home Animal Rescue", css: "landing.css", active: "home" });
+});
 
-        // Handle requests for the pet details page
-        if (pathname === '/details') {
-            const pet = findPet(query.shelterId, query.petId);
-            const shelter = shelters.find(s => (s.id === query.shelterId));
-            let processingFee = 30;
-            if (shelter && shelter.processingFee)
+// Handle the GET /about route to the About Us page
+app.get("/about", (request, response) => {
+    response.render("about", { title: "New Home - About", css: "about.css", active: "about", about: aboutData });
+});
+
+// Handle the GET /browse route to the Browse Pets page
+app.get("/browse", (request, response) => {
+    const list = shelters.map(shelter => ({ id: shelter.id, name: shelter.name }));
+    response.render("browse", { title: "New Home - Browse", css: "browse.css", active: "browse", shelters: list });
+});
+
+// Handle the GET /details route to the pet details page
+app.get("/details", (request, response) => {
+    const shelterId = request.query.shelterId;
+    const petId = request.query.petId;
+    let error = undefined;
+    let pet = undefined;
+    let processingFee = 30; // default 30 if missing
+    let totalFee = 0;
+
+    if (!shelterId || !petId) {
+        error = "Missing pet ID and/or shelter ID.";
+    } else {
+        const shelter = shelters.find(shelter => shelter.id === shelterId);
+        pet = findPet(shelterId, petId);
+        if (!shelter || !pet) {
+            error = "Pet Not Found. Either shelter ID or pet ID is invalid.";
+            pet = undefined;
+        } else {
+            if (shelter.processingFee)
                 processingFee = shelter.processingFee;
-            const totalFee = pet ? Number(pet.adoptionFee) + Number(processingFee) : 0;
-            return renderPage(res, 'pet', {title: 'New Home - Pet Details', css: 'pet.css', active: 'browse',
-                pet: pet, shelterId: query.shelterId, processingFee: processingFee, totalFee: totalFee});
-        }
+            totalFee = Number(pet.adoptionFee) + Number(processingFee);
 
-        // Handle requests for the application form page
-        if (pathname === '/apply') {
-            const pet = findPet(query.shelterId, query.petId);
-            const shelter = shelters.find(s => (s.id === query.shelterId));
-            let processingFee = 30;
-            if (shelter && shelter.processingFee)
-                processingFee = shelter.processingFee;
-            const totalFee = pet ? Number(pet.adoptionFee) + Number(processingFee) : 0;
-            return renderPage(res, 'apply', {title: 'New Home - Application', css: 'apply.css', active: 'browse',
-                pet: pet, processingFee: processingFee, totalFee: totalFee});
+            // Count this view and save it so the count survives a server restart
+            pet.views = (pet.views || 0) + 1;
+            saveShelter(shelter);
         }
-        
-        // Handle an API request for one pet's data
-        if (pathname === '/shelters/pets') { 
-            if ((query.shelterId) && (query.petId)) { 
-                const pet = findPet(query.shelterId, query.petId);
-                if (pet)
-                    return res.writeHead(200, {'Content-Type': 'application/json'}).end(JSON.stringify(pet));
-                else
-                    return res.writeHead(404).end('Pet Not Found. Either shelter ID or pet ID is invalid.'); 
-            }
-            else 
-                return res.writeHead(404).end('Missing pet ID and/or shelter ID.'); 
-        }
-        // Handle an API request for basic shelter data (i.e., not the pet info)
-        if (pathname === '/shelters') {             
-            if (query.id) { // Handle request for one shelter's data
-                const shelter = shelters.find(shelter => (shelter.id === query.id));
-                if (shelter) 
-                    return res.writeHead(200, {'Content-Type': 'application/json'}).end(JSON.stringify(shelter));
-                else
-                    return res.writeHead(404).end('Shelter Not Found');
-            }
-            res.writeHead(200, {'Content-Type': 'application/json'});
-            return res.end(JSON.stringify(shelters.map(shelter => ({ id: shelter.id, name: shelter.name, city: shelter.city, processingFee: shelter.processingFee }))));
-        }
-        // Handle an API request for one application's details
-        if (pathname === '/applications-details') { 
-            if (query.id) { 
-                const app = applications.find(a => (a.applicationId === query.id));
-                if (app) 
-                    return res.writeHead(200, {'Content-Type': 'application/json'}).end(JSON.stringify(app));
-                else
-                    return res.writeHead(404).end('Application not Found. Invalid ID.');
-            }
-            return res.writeHead(404).end('Application not Found. Missing ID.');
-        }
-        // Handle an API request for overall applications data
-        if (pathname === '/applications-data') {  
-            const appData = [];    
-            for (let i=0; i<applications.length; i++) {
-                const app = applications[i];
-                const pet = findPet(app.shelterId, app.petId);
-                let oneApp = {}; 
-                oneApp.date = app.date;
-                oneApp.applicationId = app.applicationId;
-                oneApp.shelterId = app.shelterId;
-                oneApp.petId = app.petId;
-                if (pet)
-                    oneApp.petType = pet.type;
-                oneApp.status = app.status;
-                appData.push(oneApp);
-            }
-            return res.writeHead(200, {'Content-Type': 'application/json'}).end(JSON.stringify(appData));
-        }
-        
-        return serveStatic(path.join(__dirname, '.' + pathname), res);
     }
-    // Handle incoming submitted application
-    if (req.method === 'POST' && pathname === '/submit-application') {
-        readRequestBody(req, (body) => {
-            try {
-                // Get the application and add it to the submitted applications
-                const application = JSON.parse(body); 
+    response.render("pet", { title: "New Home - Pet Details", css: "pet.css", active: "browse",
+        pet: pet, error: error, shelterId: shelterId, processingFee: processingFee, totalFee: totalFee });
+});
 
-                // Add the current date/time, a unique ID and a status
-                application.date = new Date().toLocaleString('en-CA', { 
-                                            year: 'numeric', month: '2-digit', day: '2-digit',
-                                            hour: '2-digit', minute: '2-digit' });
-                application.applicationId = "a" + (applications.length + 1); // This is ok since we will never remove
-                application.status = "Unprocessed";
-                applications.push(application);
+// Handle the GET /apply route to the application page (pet info comes in the query parameters)
+app.get("/apply", (request, response) => {
+    const q = request.query;
+    let total = 0;
+    let valid = false;
+    if (q.petId && q.petName && q.petType && q.petBreed && q.adoptionFee && q.processingFee) {
+        valid = true;
+        total = parseInt(q.adoptionFee) + parseInt(q.processingFee);
+    }
+    response.render("apply", { title: "New Home - Application", css: "apply.css", active: "browse",
+        valid: valid, pet: q, total: total });
+});
 
-                res.writeHead(200, {'Content-Type': 'text/plain'});
-                return res.end('Application received');
-            } catch(e) {
-                console.error(e);
-                res.writeHead(400, {'Content-Type': 'text/plain'});
-                return res.end('Invalid application data');
-            }
+// Handle the GET /admin/applications route to the Applications page
+app.get("/admin/applications", (request, response) => {
+    const appData = [];
+    for (let i=0; i<applications.length; i++) {
+        const application = applications[i];
+        const pet = findPet(application.shelterId, application.petId);
+        appData.push({ date: application.date, applicationId: application.applicationId,
+                       shelterId: application.shelterId, petId: application.petId,
+                       petType: pet ? pet.type : "", status: application.status });
+    }
+    response.render("applications", { title: "Applications - New Home Animal Rescue", css: "applications.css",
+        active: "applications", applications: appData });
+});
+
+// Handle the GET /admin/shelters route: JSON or the Shelters page depending on the Accept header
+app.get("/admin/shelters", (request, response) => {
+    if (request.accepts(["html", "json"]) === "json") {
+        const list = shelters.map(shelter => ({ id: shelter.id, name: shelter.name, city: shelter.city,
+                                                processingFee: shelter.processingFee, petCount: shelter.pets.length }));
+        response.send({ count: list.length, shelters: list });
+    }
+    else
+        response.render("shelters", { title: "New Home - Shelters", css: "shelters.css", active: "shelters", shelters: shelters });
+});
+
+// Handle the POST /admin/shelters route to add a new shelter
+app.post("/admin/shelters", (request, response) => {
+    const name = request.body.name;
+    const city = request.body.city;
+    const processingFee = request.body.processingFee;
+
+    // Make sure the name, city and fee are all valid
+    if (typeof name !== "string" || name.trim() === "")
+        return response.status(400).send("Shelter name must not be blank.");
+    if (typeof city !== "string" || city.trim() === "")
+        return response.status(400).send("Shelter city must not be blank.");
+    if (processingFee === undefined || String(processingFee).trim() === "" || isNaN(Number(processingFee)) || Number(processingFee) < 0)
+        return response.status(400).send("Shelter processing fee must be a number that is 0 or more.");
+
+    // Get the next shelter ID from the file and then increase it in the file
+    const nextIDs = JSON.parse(fs.readFileSync(nextIDsFile, "utf-8"));
+    const shelter = { id: "s" + nextIDs.nextShelterId, name: name.trim(), city: city.trim(),
+                      processingFee: Number(processingFee), pets: [] };
+    nextIDs.nextShelterId++;
+    fs.writeFileSync(nextIDsFile, JSON.stringify(nextIDs));
+
+    // Save the shelter in its own file (named with its ID) and add it to the shelters
+    const fileName = shelter.id + ".json";
+    fs.writeFileSync(path.join(sheltersDir, fileName), JSON.stringify(shelter, null, 2));
+    shelters.push(shelter);
+
+    response.status(201).send("Shelter " + shelter.id + " added");
+});
+
+// Handle the DELETE /admin/shelters/:id route to delete a shelter
+app.delete("/admin/shelters/:id", (request, response) => {
+    const id = request.params.id;
+    const shelter = shelters.find(shelter => shelter.id === id);
+    if (!shelter)
+        return response.status(404).send("Shelter Not Found. Invalid ID.");
+
+    // Remove the shelter (its file is left alone for now)
+    shelters = shelters.filter(shelter => shelter.id !== id);
+    delete shelterFiles[id];
+
+    response.send("Shelter " + id + " deleted");
+});
+
+// Handle the GET /admin/shelters/:sID route: JSON of the whole shelter or the Shelter Info page
+app.get("/admin/shelters/:sID", (request, response) => {
+    const shelter = shelters.find(shelter => shelter.id === request.params.sID);
+    if (!shelter)
+        return response.status(404).send("Shelter Not Found. Invalid ID.");
+
+    if (request.accepts(["html", "json"]) === "json")
+        response.send(shelter);
+    else
+        response.render("shelterInfo", { title: "New Home - Shelter Info", css: "shelterInfo.css", active: "shelters", shelter: shelter });
+});
+
+// Handle the PUT /admin/shelters/:sID route to update a shelter's id, name, city and processing fee
+app.put("/admin/shelters/:sID", (request, response) => {
+    const shelter = shelters.find(shelter => shelter.id === request.params.sID);
+    if (!shelter)
+        return response.status(404).send("Shelter Not Found. Invalid ID.");
+
+    const id = String(request.body.id || "").trim();
+    const name = String(request.body.name || "").trim();
+    const city = String(request.body.city || "").trim();
+    const fee = String(request.body.processingFee === undefined ? "" : request.body.processingFee).trim();
+
+    if (!id || !name || !city || !fee)
+        return response.status(400).send("The ID, name, city and processing fee must not be blank.");
+    if (!/^[A-Za-z0-9_-]+$/.test(id))
+        return response.status(400).send("The ID can only contain letters, numbers, - and _.");
+    if (isNaN(Number(fee)) || Number(fee) < 0)
+        return response.status(400).send("The processing fee must be a number that is 0 or more.");
+    if (id !== shelter.id && shelters.find(other => other.id === id))
+        return response.status(400).send("That shelter ID is already in use.");
+
+    // If the ID changed, the shelter's file is renamed (files are named by shelter ID)
+    if (id !== shelter.id) {
+        const newFile = id + ".json";
+        if (fs.existsSync(path.join(sheltersDir, newFile)))
+            return response.status(400).send("That shelter ID cannot be used.");
+        fs.renameSync(path.join(sheltersDir, shelterFiles[shelter.id]), path.join(sheltersDir, newFile));
+        delete shelterFiles[shelter.id];
+        shelterFiles[id] = newFile;
+
+        // Keep the submitted applications pointing at this shelter
+        applications.forEach(application => {
+            if (application.shelterId === shelter.id)
+                application.shelterId = id;
         });
-        return;
     }
-    // Handle incoming API request for an application status update
-    if (req.method === 'PUT' && pathname === '/applications-update') {
-        readRequestBody(req, (body) => {
-            try {
-                // Get the application ID and its updated status from the request body
-                const {applicationId, status} = JSON.parse(body); 
+    shelter.id = id;
+    shelter.name = name;
+    shelter.city = city;
+    shelter.processingFee = Number(fee);
+    saveShelter(shelter);
 
-                // Update the status as long as the ID is valid and the status is available
-                if (applicationId && status) {
-                    const aId = parseInt(applicationId.slice(1), 10);
-                    if (aId <= applications.length)
-                        applications[aId-1].status = status;
-                }
-                res.writeHead(200, {'Content-Type': 'text/plain'});
-                return res.end("Application " + applicationId + " updated");
-            } catch(e) {
-                console.error(e);
-                res.writeHead(400, {'Content-Type': 'text/plain'});
-                return res.end('Missing application status update data');
-            }
-        });
-        return;
+    response.send("Shelter " + id + " updated");
+});
+
+// Handle the POST /admin/shelters/:sID/pets route to add a pet to a shelter (with an optional image)
+app.post("/admin/shelters/:sID/pets", upload.single("image"), (request, response) => {
+    // Remove an uploaded image if the pet cannot be added
+    const fail = (status, message) => {
+        if (request.file)
+            fs.unlinkSync(request.file.path);
+        return response.status(status).send(message);
+    };
+    const shelter = shelters.find(shelter => shelter.id === request.params.sID);
+    if (!shelter)
+        return fail(404, "Shelter Not Found. Invalid ID.");
+    if (request.badImage)
+        return fail(400, "Only image files are allowed.");
+
+    const pet = {};
+    const error = readPetFields(request.body, pet);
+    if (error)
+        return fail(400, error);
+
+    // Get the next pet ID from the file and then increase it in the file
+    const nextIDs = JSON.parse(fs.readFileSync(nextIDsFile, "utf-8"));
+    pet.id = "p" + nextIDs.nextPetId;
+    nextIDs.nextPetId++;
+    fs.writeFileSync(nextIDsFile, JSON.stringify(nextIDs));
+
+    if (request.file)
+        pet.image = "images/" + request.file.filename;
+    else
+        pet.image = String(request.body.image || "").trim() || "images/unknownPet.jpg";
+    pet.views = 0;
+    pet.daysAtShelter = 1;
+
+    shelter.pets.push(pet);
+    saveShelter(shelter);
+    response.status(201).send("Pet " + pet.id + " added");
+});
+
+// Handle the PUT /admin/shelters/:sID/pets/:pID route to update a pet (with an optional new image)
+app.put("/admin/shelters/:sID/pets/:pID", upload.single("image"), (request, response) => {
+    const fail = (status, message) => {
+        if (request.file)
+            fs.unlinkSync(request.file.path);
+        return response.status(status).send(message);
+    };
+    const shelter = shelters.find(shelter => shelter.id === request.params.sID);
+    if (!shelter)
+        return fail(404, "Shelter Not Found. Invalid ID.");
+    const pet = shelter.pets.find(pet => pet.id === request.params.pID);
+    if (!pet)
+        return fail(404, "Pet Not Found. Invalid ID.");
+    if (request.badImage)
+        return fail(400, "Only image files are allowed.");
+
+    // Check everything first, using a copy so that nothing changes if there is a problem
+    const changes = {};
+    const error = readPetFields(request.body, changes);
+    if (error)
+        return fail(400, error);
+
+    Object.assign(pet, changes);
+    if (request.file)
+        pet.image = "images/" + request.file.filename;
+    else if (String(request.body.image || "").trim())
+        pet.image = String(request.body.image).trim();
+    saveShelter(shelter);
+    response.send("Pet " + pet.id + " updated");
+});
+
+// Handle the DELETE /admin/shelters/:sID/pets/:pID route to delete a pet from a shelter
+app.delete("/admin/shelters/:sID/pets/:pID", (request, response) => {
+    const shelter = shelters.find(shelter => shelter.id === request.params.sID);
+    if (!shelter)
+        return response.status(404).send("Shelter Not Found. Invalid ID.");
+    const pet = shelter.pets.find(pet => pet.id === request.params.pID);
+    if (!pet)
+        return response.status(404).send("Pet Not Found. Invalid ID.");
+
+    shelter.pets = shelter.pets.filter(pet => pet.id !== request.params.pID);
+    saveShelter(shelter);
+    response.send("Pet " + request.params.pID + " deleted");
+});
+
+// Handle the POST /submit-application route to handle a new application
+app.post("/submit-application", (request, response) => {
+    // Get the application, which is in the request body
+    const application = request.body;
+    if (!application || !application.petId || !application.shelterId)
+        return response.status(400).send("Invalid application data");
+
+    // Add the current date/time, a unique ID and a status, then store it
+    application.date = new Date().toLocaleString("en-CA", {
+                                year: "numeric", month: "2-digit", day: "2-digit",
+                                hour: "2-digit", minute: "2-digit" });
+    application.applicationId = "a" + (applications.length + 1); // This is ok since we will never remove
+    application.status = "Unprocessed";
+    applications.push(application);
+
+    // Send a response
+    response.send("Application received");
+});
+
+// Handle the GET /shelters route to get a JSON array of the basic shelter data, or one whole shelter if an id is given
+app.get("/shelters", (request, response) => {
+    if (request.query.id) {
+        const shelter = shelters.find(shelter => shelter.id === request.query.id);
+        if (shelter)
+            return response.send(shelter);
+        else
+            return response.status(404).send("Shelter Not Found");
     }
-    // Handle anything else as an error
-    res.writeHead(404).end('Not Found');
-}
+    response.send(shelters.map(shelter => ({ id: shelter.id, name: shelter.name, city: shelter.city, processingFee: shelter.processingFee })));
+});
 
-// Start the server
-http.createServer(handleRequest).listen(3000);
-console.log('Adoption Company Server running on http://localhost:3000');
+// Handle the GET /shelters/pets route to get a single pet's JSON data
+app.get("/shelters/pets", (request, response) => {
+    if (request.query.shelterId && request.query.petId) {
+        const pet = findPet(request.query.shelterId, request.query.petId);
+        if (pet)
+            response.send(pet);
+        else
+            response.status(404).send("Pet Not Found. Either shelter ID or pet ID is invalid.");
+    }
+    else
+        response.status(404).send("Missing pet ID and/or shelter ID.");
+});
+
+// Handle the GET /admin/applications-details route to get a single application's JSON data
+app.get("/admin/applications-details", (request, response) => {
+    if (request.query.id) {
+        const application = applications.find(application => application.applicationId === request.query.id);
+        if (application)
+            response.send(application);
+        else
+            response.status(404).send("Application not Found. Invalid ID.");
+    }
+    else
+        response.status(404).send("Application not Found. Missing ID.");
+});
+
+// Handle the PUT /admin/applications-update route to update an application's status
+app.put("/admin/applications-update", (request, response) => {
+    const applicationId = request.body.applicationId;
+    const status = request.body.status;
+    if (!applicationId || !status)
+        return response.status(400).send("Missing application status update data");
+
+    const application = applications.find(application => application.applicationId === applicationId);
+    if (application) {
+        application.status = status;
+        response.send("Application " + applicationId + " updated");
+    }
+    else
+        response.status(404).send("Application not Found. Invalid ID.");
+});
+
+
+// Handle all unknown URL routes
+app.use((request, response) => {
+    response.status(404).send("Page not found");
+});
+app.listen(PORT);
+console.log(`Server running at http://localhost:${PORT}`);

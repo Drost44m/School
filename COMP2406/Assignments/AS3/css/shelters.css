@@ -1,0 +1,61 @@
+.shelters-main {
+    max-width: 700px;
+    margin: 0px auto;
+    padding: 20px;
+}
+.shelters-main h1 {
+    text-align: center;
+    color: #ea6608dd;
+    margin-bottom: 20px;
+}
+.shelters-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    padding: 20px 25px;
+}
+#shelterList {
+    list-style: none;
+    padding: 0;
+}
+#shelterList li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+}
+#shelterList a {
+    color: #2c2c2c;
+    font-weight: bold;
+    text-decoration: none;
+}
+#shelterList a:hover {
+    color: #ea6608dd;
+}
+.remove-icon {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+}
+.add-shelter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.add-shelter input {
+    flex: 1;
+    min-width: 140px;
+    padding: 8px;
+}
+.add-shelter button {
+    padding: 8px 16px;
+    background: #A9724B;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.add-shelter button:hover {
+    background: #ea6608dd;
+}

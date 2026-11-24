@@ -30,6 +30,97 @@ main.applications-main
   .application-details-section
     .applications-card
       #applicationDetails
+        .details-card.hidden
+          table.details-layout
+            tr
+              td.details-col
+                h4 Application Info
+                p
+                  strong Date Submitted:
+                  |  
+                  span#d-date
+                p
+                  strong Status:
+                  |  
+                  span#d-status
+                p
+                  strong Pet ID:
+                  |  
+                  span#d-petId
+                p
+                  strong Shelter ID:
+                  |  
+                  span#d-shelterId
+              td.details-col
+                h4 Pet Requested
+                table.pet-requested-layout
+                  tr
+                    td.pet-text
+                      p
+                        strong Name:
+                        |  
+                        span#p-name
+                      p
+                        strong Type:
+                        |  
+                        span#p-type
+                      p
+                        strong Breed:
+                        |  
+                        span#p-breed
+                      p
+                        strong Age:
+                        |  
+                        span#p-age
+                      p
+                        strong Days at Shelter:
+                        |  
+                        span#p-days
+                    td.pet-image-cell
+                      img#p-image.pet-image(src="" alt="")
+            tr
+              td.details-col(colspan="2")
+                h4 Applicant Information
+                p
+                  strong Name:
+                  |  
+                  span#a-name
+                p
+                  strong Email:
+                  |  
+                  span#a-email
+                p
+                  strong Phone:
+                  |  
+                  span#a-phone
+                p
+                  strong Address:
+                  |  
+                  span#a-address
+
+                h4 Household Details
+                p
+                  strong Number of Residents:
+                  |  
+                  span#a-residents
+                p
+                  strong Current Pets:
+                  |  
+                  span#a-currentPets
+                p
+                  strong Experience Level:
+                  |  
+                  span#a-experience
+                p
+                  strong Pet Location:
+                  |  
+                  span#a-location
+
+                h4 Support
+                p
+                  strong Donation:
+                  |  $
+                  span#a-donation
 
 script(src="/js/applications.js")
 

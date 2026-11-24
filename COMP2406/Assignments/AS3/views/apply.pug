@@ -3,10 +3,10 @@ include header
 section.form-section
   form#adoptionForm
     #petApplicationInfo.pet-info
-      if pet
-        h2 Applying to Adopt: #{pet.name}
-        p Type: #{pet.type} | Breed: #{pet.breed}
-        p Adoption Fee: $#{pet.adoptionFee} + Processing Fee: $#{processingFee} = Total (before taxes): $#{totalFee}
+      if valid
+        h2 Applying to Adopt: #{pet.petName}
+        p Type: #{pet.petType} | Breed: #{pet.petBreed}
+        p Adoption Fee: $#{pet.adoptionFee} + Processing Fee: $#{pet.processingFee} = Total (before taxes): $#{total}
       else
         p.error Incomplete Pet .
 
