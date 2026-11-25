@@ -1,0 +1,24 @@
+- var title = "The Laughing Ladle – Specials"
+- var style = "/styles/specials.css"
+include partials/header
+
+h1 Chef's Limited-Time Specials
+
+p.specials-subtitle
+    | Available for a short time only — enjoy these exclusive seasonal creations 
+    | while they last.
+
+div.specials-banner
+    span Limited Time Offer
+
+div.specials-container
+    - for (let item of specials)
+        div.special-card
+            img(src=item.image, alt=item.name)
+            div.special-info
+                h2= item.name
+                span.price $
+                    = item.price
+                p= item.description
+
+include partials/footer

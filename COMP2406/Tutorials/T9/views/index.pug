@@ -1,0 +1,20 @@
+- var title = "The Laughing Ladle"
+- var style = "styles/index.css"
+include partials/header
+
+h1 Welcome to The Laughing Ladle!
+img#restaurant-img(src="images/inside-restaurant.jpg", 
+                   alt="The Laughing Ladle interior")
+
+p Delicious meals, good vibes, and laughter at every table.
+p Come join us for a great dining experience with friends and family!
+p 
+    a#book-reservation-link(href="/reservations") Make a Reservation
+
+div.promo
+    img(src="images/appetizers.jpg", alt="Delicious appetizers")
+    div.promo-text
+        h2 Weekend Happy Hour!
+        p#good-deal Get 20% off all appetizers every Friday and Saturday from 4 PM – 7 PM!
+
+include partials/footer

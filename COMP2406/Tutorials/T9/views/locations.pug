@@ -1,0 +1,28 @@
+- var title = "The Laughing Ladle – Locations"
+- var style = "styles/locations.css"
+include partials/header
+
+h1 Our Locations
+
+table(id="locationsTable")
+    - for (let rowStart=0; rowStart<locations.length; rowStart+=3)
+        tr
+            - for (let i=rowStart; i<rowStart+3; i++)
+                - const loc = locations[i]
+                td
+                    h2
+                        = loc.name1
+                        br
+                        = loc.name2
+                    p(id="details"+i)
+                        = loc.street
+                        br
+                        = loc.cityProv
+                        br
+                        | Phone: 
+                        = loc.phone 
+script.
+    const locations = !{JSON.stringify(locations)}
+
+- var script = "scripts/locations-page.js"
+include partials/footer
